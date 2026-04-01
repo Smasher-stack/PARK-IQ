@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Smart Parking — Real-time intelligent parking with automation, analytics, and live tracking.">
+    <title>ParkIQ — Smart Parking, Reimagined</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz,wght@6..12,300;6..12,400;6..12,500;6..12,600;6..12,700;6..12,800;6..12,900&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- ══════════ NAVBAR ══════════ -->
+    <nav class="navbar" id="navbar">
+        <div class="container nav-wrap">
+            <a href="#home" class="logo">
+                <div class="logo-mark"><i data-lucide="square-parking"></i></div>
+                <span>ParkIQ</span>
+            </a>
+            <div class="nav-links" id="navLinks">
+                <a href="#home" class="nav-link active">Home</a>
+                <a href="#features" class="nav-link">Features</a>
+                <a href="map.html" target="_blank" class="nav-link"
+                    style="color: var(--accent); font-weight: 800; display: inline-flex; align-items: center; gap: 4px;">Live
+                    Map <i data-lucide="external-link" style="width: 14px; height: 14px;"></i></a>
+                <a href="#pricing" class="nav-link">Pricing</a>
+                <a href="#contact" class="nav-link">Contact</a>
+            </div>
+            <div class="nav-right">
+                <a href="#pricing" class="btn btn-primary btn-nav">Get Started</a>
+                <button class="hamburger" id="hamburger" aria-label="Toggle navigation">
+                    <span></span><span></span><span></span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ══════════ HERO (PRODUCT DESIGN) ══════════ -->
+    <section id="home" class="hero product-hero">
+        <video autoplay muted loop playsinline class="hero-video">
+            <source src="parking (2).mp4" type="video/mp4">
+        </video>
+        <div class="hero-overlay"></div>
+
+        <div class="container hero-container">
+            <!-- Left Content -->
+            <div class="hero-left">
+                <div class="hero-label hero-anim-1">ParkIQ</div>
+                <h1 class="hero-anim-2">Smarter Parking Starts Here.</h1>
+                <p class="hero-sub hero-anim-3">Find nearby parking, compare options, and reserve instantly — all in one
+                    place.</p>
+
+                <ul class="hero-tags hero-anim-4">
+                    <li><i data-lucide="check" class="tag-icon"></i> Real-time availability</li>
+                    <li><i data-lucide="check" class="tag-icon"></i> Instant booking</li>
+                    <li><i data-lucide="check" class="tag-icon"></i> Guided navigation</li>
+                </ul>
+
+                <div class="hero-actions hero-anim-5">
+                    <button class="btn btn-primary btn-lg btn-glow">Find Parking Now</button>
+                    <a href="#how" class="text-link">Explore how it works <i data-lucide="arrow-right"></i></a>
+                </div>
+            </div>
+
+            <!-- Right UI Panel -->
+            <div class="hero-right hero-anim-5">
+                <!-- Main Floating Card -->
+                <div class="ui-card-wrapper">
+                    <div class="floating-ui-card ui-tilted">
+                        <div class="ui-card-header">
+                            <span class="ui-slot">Slot A12</span>
+                            <div class="ui-status"><span class="status-dot"></span> Available</div>
+                        </div>
+                        <div class="ui-divider"></div>
+                        <div class="ui-card-body">
+                            <div class="ui-distance">
+                                <i data-lucide="navigation"></i> <span>120m away <span class="ui-subtext">(2 min
+                                        walk)</span></span>
+                            </div>
+                            <div class="ui-rate">
+                                <i data-lucide="banknote"></i> <span>$2.50 / hour</span>
+                            </div>
+                        </div>
+                        <div class="ui-divider"></div>
+                        <div class="ui-card-footer">
+                            <button class="btn btn-primary btn-book btn-sm">Reserve Slot</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ══════════ TRUST / STATS ══════════ -->
+    <section class="stats-section">
+        <div class="container">
+            <div class="stats-plain-wrapper reveal">
+                <div class="stat-plain-item">
+                    <div class="stat-value">
+                        <span class="stat-number" data-target="2">0</span><span class="stat-suffix">×</span>
+                    </div>
+                    <p class="stat-label">Faster Parking</p>
+                </div>
+                <div class="stat-separator"></div>
+                <div class="stat-plain-item">
+                    <div class="stat-value">
+                        <span class="stat-number" data-target="30">0</span><span class="stat-suffix">%</span>
+                    </div>
+                    <p class="stat-label">Less Search Time</p>
+                </div>
+                <div class="stat-separator"></div>
+                <div class="stat-plain-item">
+                    <div class="stat-value">
+                        <span class="stat-number" data-target="95">0</span><span class="stat-suffix">%</span>
+                    </div>
+                    <p class="stat-label">Availability Accuracy</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══════════ FEATURES ══════════ -->
+    <section id="features" class="section features-section">
+        <div class="container">
+            <div class="section-header reveal">
+                <span class="section-tag">Features</span>
+                <h2>Find, Choose, Park — Without the Guesswork</h2>
+                <p>Everything you need to find, reserve, and navigate parking — all in one flow.</p>
+            </div>
+            <div class="features-bento">
+                <div class="feature-card feat-primary reveal">
+                    <div class="mock-ui mock-map">
+                        <div class="mock-pin"><span class="mock-pulse"></span></div>
+                    </div>
+                    <h3>See What’s Open — Before You Get There</h3>
+                    <p>Know exactly where to park before you arrive.</p>
+                </div>
+                <div class="feature-card reveal reveal-delay-1">
+                    <div class="mock-ui mock-route"><i data-lucide="corner-up-right"></i></div>
+                    <h3>Go Straight to Your Spot</h3>
+                    <p>Turn-by-turn guidance to the best space.</p>
+                </div>
+                <div class="feature-card reveal reveal-delay-2">
+                    <div class="mock-ui mock-timer"><i data-lucide="clock"></i> <span>01:24:00 left</span></div>
+                    <h3>Stay on Time, Every Time</h3>
+                    <p>Get alerts before your session ends.</p>
+                </div>
+                <div class="feature-card feat-wide reveal reveal-delay-1">
+                    <div class="feat-wide-text">
+                        <h3>Pay Only for What You Need</h3>
+                        <p>Smart pricing based on time and demand.</p>
+                    </div>
+                    <div class="mock-ui mock-chart">
+                        <div class="m-bar h-1"></div>
+                        <div class="m-bar h-2"></div>
+                        <div class="m-bar h-3"></div>
+                        <div class="m-bar h-4"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══════════ HOW IT WORKS ══════════ -->
+    <section id="how" class="section how-section">
+        <div class="container">
+            <div class="section-header reveal">
+                <span class="section-tag">How It Works</span>
+                <h2>Three steps to smarter parking</h2>
+                <p>From entry to exit — seamless, automated, effortless.</p>
+            </div>
+            <div class="steps-track">
+                <div class="steps-line" aria-hidden="true">
+                    <div class="steps-line-fill" id="stepsLineFill"></div>
+                </div>
+                <div class="step-item reveal">
+                    <div class="step-num">1</div>
+                    <div class="step-icon-wrap"><i data-lucide="log-in"></i></div>
+                    <h3>Enter Vehicle</h3>
+                    <p>Drive in — the system detects and registers your vehicle automatically.</p>
+                </div>
+                <div class="step-item reveal reveal-delay-1">
+                    <div class="step-num">2</div>
+                    <div class="step-icon-wrap"><i data-lucide="map-pin"></i></div>
+                    <h3>Get Smart Slot</h3>
+                    <p>Follow the digital guide to your optimally assigned parking space.</p>
+                </div>
+                <div class="step-item reveal reveal-delay-2">
+                    <div class="step-num">3</div>
+                    <div class="step-icon-wrap"><i data-lucide="clock"></i></div>
+                    <h3>Park &amp; Track</h3>
+                    <p>Your timer starts. Track duration, cost, and alerts on the live dashboard.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ══════════ VISUAL / IMAGE SECTION ══════════ -->
+    <section id="pricing" class="section visual-section">
+        <div class="container visual-layout">
+            <div class="visual-content reveal">
+                <span class="section-tag">Why Us</span>
+                <h2>Built for scale.<br>Designed for simplicity.</h2>
+                <p>Whether you manage 20 spots or 20,000 — our platform adapts. No code required, no hardware lock-in.
+                </p>
+                <ul class="check-list">
+                    <li><i data-lucide="check-circle-2"></i> Cloud-native, zero maintenance</li>
+                    <li><i data-lucide="check-circle-2"></i> Works with any sensor hardware</li>
+                    <li><i data-lucide="check-circle-2"></i> Real-time analytics dashboard</li>
+                    <li><i data-lucide="check-circle-2"></i> Free tier available</li>
+                </ul>
+                <a href="#pricing" class="btn btn-primary btn-lg">
+                    Get Started Free
+                </a>
+            </div>
+            <div class="visual-image-wrap reveal reveal-delay-1">
+                <div class="vi-card">
+                    <div class="vi-header">
+                        <span class="vi-title"><i data-lucide="bar-chart-3" class="vi-icon"></i> Occupancy
+                            Analytics</span>
+                    </div>
+                    <div class="vi-chart" id="viChart"></div>
+                    <div class="vi-footer">
+                        <span class="vi-metric"><strong>87%</strong> avg. occupancy</span>
+                        <span class="vi-metric vi-up"><i data-lucide="trending-up" class="vi-trend-icon"></i> +12% this
+                            week</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══════════ CTA ══════════ -->
+    <section class="cta-section">
+        <div class="container cta-inner reveal">
+            <h2>Start Smarter Parking Today</h2>
+            <p>Join thousands of modern facilities already using our platform.</p>
+            <a href="#contact" class="btn btn-white btn-lg btn-pulse">
+                Get Started Now <i data-lucide="arrow-right" class="btn-icon"></i>
+            </a>
+        </div>
+    </section>
+
+    <!-- ══════════ FOOTER ══════════ -->
+    <footer id="contact" class="footer">
+        <div class="container footer-grid">
+            <div class="footer-brand">
+                <a href="#home" class="logo">
+                    <div class="logo-mark"><i data-lucide="square-parking"></i></div>
+                    <span>ParkIQ</span>
+                </a>
+                <p>Intelligent lot management for modern facilities worldwide.</p>
+            </div>
+            <div class="footer-col">
+                <h4>Product</h4>
+                <a href="#features">Features</a>
+                <a href="#pricing">Pricing</a>
+                <a href="#">Changelog</a>
+            </div>
+            <div class="footer-col">
+                <h4>Company</h4>
+                <a href="#">About</a>
+                <a href="#">Blog</a>
+                <a href="#">Careers</a>
+                <a href="#contact">Contact</a>
+            </div>
+            <div class="footer-col">
+                <h4>Legal</h4>
+                <a href="#">Privacy</a>
+                <a href="#">Terms</a>
+                <a href="#">Security</a>
+            </div>
+        </div>
+        <div class="container footer-bottom">
+            <p>&copy; <span id="footerYear"></span> ParkIQ. All rights reserved.</p>
+            <div class="footer-socials">
+                <a href="#" aria-label="Twitter"><i data-lucide="twitter"></i></a>
+                <a href="#" aria-label="GitHub"><i data-lucide="github"></i></a>
+                <a href="#" aria-label="LinkedIn"><i data-lucide="linkedin"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

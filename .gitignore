@@ -1,0 +1,7 @@
+.agent/
+init.json
+init_output.txt
+err.txt
+push_err2.txt
+push_error.txt
+*.mp4

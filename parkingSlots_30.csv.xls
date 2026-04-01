@@ -1,0 +1,31 @@
+id,name,lat,lng,status,totalSlots,availableSlots
+P001,T Nagar Parking Hub 1,13.047847,80.242617,available,88,51
+P002,Pondy Bazaar Parking 2,13.032099,80.231158,available,93,53
+P003,Anna Nagar Tower Parking 3,13.079917,80.214309,limited,72,4
+P004,Koyambedu Metro Parking 4,13.070828,80.208921,available,124,63
+P005,Velachery Mall Parking 5,12.974061,80.230148,available,134,49
+P006,OMR Tech Park Parking 6,12.906107,80.22701,available,83,11
+P007,Adyar Parking Zone 7,12.99482,80.254653,available,62,41
+P008,Besant Nagar Beach Parking 8,13.006825,80.271452,available,110,98
+P009,Guindy Industrial Estate Parking 9,13.012172,80.213375,available,97,88
+P010,Chennai Central Parking 10,13.078227,80.282675,available,150,113
+P011,T Nagar Parking Hub 11,13.046896,80.232771,available,118,25
+P012,Pondy Bazaar Parking 12,13.043016,80.242183,available,150,139
+P013,Anna Nagar Tower Parking 13,13.075725,80.213974,available,112,82
+P014,Koyambedu Metro Parking 14,13.078366,80.195213,available,88,63
+P015,Velachery Mall Parking 15,12.985109,80.212123,available,95,42
+P016,OMR Tech Park Parking 16,12.911493,80.220803,occupied,41,0
+P017,Adyar Parking Zone 17,13.003788,80.24869,available,70,57
+P018,Besant Nagar Beach Parking 18,13.005152,80.272192,available,104,100
+P019,Guindy Industrial Estate Parking 19,13.002238,80.217017,available,98,51
+P020,Chennai Central Parking 20,13.088311,80.284997,available,81,36
+P021,T Nagar Parking Hub 21,13.036967,80.242196,available,105,40
+P022,Pondy Bazaar Parking 22,13.045549,80.225375,limited,59,8
+P023,Anna Nagar Tower Parking 23,13.0846,80.21201,available,141,111
+P024,Koyambedu Metro Parking 24,13.065861,80.213547,available,130,112
+P025,Velachery Mall Parking 25,12.976026,80.227147,limited,108,6
+P026,OMR Tech Park Parking 26,12.907005,80.224266,available,129,120
+P027,Adyar Parking Zone 27,12.997325,80.252079,available,81,18
+P028,Besant Nagar Beach Parking 28,13.009079,80.266042,available,119,67
+P029,Guindy Industrial Estate Parking 29,13.009627,80.212878,available,71,11
+P030,Chennai Central Parking 30,13.075449,80.282118,available,95,21
