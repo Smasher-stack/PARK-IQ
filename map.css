@@ -26,7 +26,7 @@ body, html {
 }
 
 /* ════════ NAVBAR (PORTED FROM LANDING PAGE) ════════ */
-.container { width: 100%; max-width: 1180px; margin: 0 auto; padding: 0 28px; }
+.container { width: 100%; max-width: 100%; padding: 0 24px; }
 .navbar { position: fixed; top: 0; left: 0; width: 100%; z-index: 2000; background: #ffffff; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
 .nav-wrap { display: flex; align-items: center; justify-content: space-between; height: 72px; }
 .logo { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 1.3rem; text-decoration: none; color: #1a1a1a; }

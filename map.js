@@ -65,9 +65,9 @@
       <div class="popup-card">
         <h3 class="popup-title">${name}</h3>
         <div class="popup-meta">
-          <span>
+          <span class="live-route-info">
             <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h11m0 0L9 9m4 3-4 3"/><path d="M22 12A10 10 0 1 1 12 2"/></svg>
-            ${mockDistNum} km
+            <span class="route-text">Calculating...</span>
           </span>
           <span>
             <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
@@ -83,6 +83,33 @@
       minWidth: 260,
       offset: [0, -4],
       autoPanPadding: [50, 50]
+    });
+
+    // When the popup opens, dynamically calculate true distance & time from the user's origin
+    marker.on('popupopen', function(e) {
+      const popupNode = e.popup.getElement();
+      if (!popupNode) return;
+      
+      const routeTextNode = popupNode.querySelector('.route-text');
+      if (routeTextNode && routeTextNode.innerText.includes("Calculating")) {
+        const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${userLng},${userLat};${lng},${lat}?overview=false`;
+        
+        fetch(osrmUrl)
+          .then(res => res.json())
+          .then(data => {
+            if (data.code === 'Ok' && data.routes && data.routes.length > 0) {
+              const distanceKm = (data.routes[0].distance / 1000).toFixed(1);
+              const durationMins = Math.max(1, Math.round(data.routes[0].duration / 60)); // minimum 1 min
+              routeTextNode.innerHTML = `<strong>${distanceKm} km</strong> • ${durationMins} min`;
+            } else {
+              routeTextNode.innerText = "Route unavailable";
+            }
+          })
+          .catch(err => {
+            console.error("OSRM Route Error:", err);
+            routeTextNode.innerText = "Distance N/A";
+          });
+      }
     });
 
     marker.on('click', function(e) {
