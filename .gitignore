@@ -1,6 +1,20 @@
 .agent/
 init.json
 init_output.txt
-err.txt
-push_err2.txt
-push_error.txt
+*.mp4
+*.txt
+
+# Node
+node_modules/
+backend/node_modules/
+
+# Environment
+.env
+backend/.env
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Build
+.dist/

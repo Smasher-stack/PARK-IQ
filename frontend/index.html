@@ -29,13 +29,14 @@
                 <a href="#home" class="nav-link active">Home</a>
                 <a href="#features" class="nav-link">Features</a>
                 <a href="map.html" target="_blank" class="nav-link"
-                    style="color: var(--accent); font-weight: 800; display: inline-flex; align-items: center; gap: 4px;">Live
-                    Map <i data-lucide="external-link" style="width: 14px; height: 14px;"></i></a>
+                    style="color: var(--accent); font-weight: 800; display: inline-flex; align-items: center; gap: 4px;">Explore
+                    Parking <i data-lucide="external-link" style="width: 14px; height: 14px;"></i></a>
                 <a href="#pricing" class="nav-link">Pricing</a>
                 <a href="#contact" class="nav-link">Contact</a>
             </div>
             <div class="nav-right">
-                <a href="#pricing" class="btn btn-primary btn-nav">Get Started</a>
+                <a href="login.html" class="btn btn-ghost btn-nav">Log In</a>
+                <a href="login.html" class="btn btn-primary btn-nav">Sign Up</a>
                 <button class="hamburger" id="hamburger" aria-label="Toggle navigation">
                     <span></span><span></span><span></span>
                 </button>
@@ -134,37 +135,46 @@
             <div class="section-header reveal">
                 <span class="section-tag">Features</span>
                 <h2>Find, Choose, Park — Without the Guesswork</h2>
-                <p>Everything you need to find, reserve, and navigate parking — all in one flow.</p>
+                <p>From discovery to departure — seamless, guided, and exact.</p>
             </div>
             <div class="features-bento">
                 <div class="feature-card feat-primary reveal">
                     <div class="mock-ui mock-map">
                         <div class="mock-pin"><span class="mock-pulse"></span></div>
+                        <div class="mock-panel-overlay">
+                            <i data-lucide="map-pin" style="width:16px;height:16px;color:var(--green)"></i> <span>Slot A12 - Open</span>
+                        </div>
                     </div>
                     <h3>See What’s Open — Before You Get There</h3>
-                    <p>Know exactly where to park before you arrive.</p>
+                    <p>Know exactly where to park before you arrive using our live coverage.</p>
                 </div>
                 <div class="feature-card reveal reveal-delay-1">
-                    <div class="mock-ui mock-route"><i data-lucide="corner-up-right"></i></div>
+                    <div class="mock-ui mock-route">
+                        <div class="route-line-anim"></div>
+                        <div class="mock-chip"><i data-lucide="navigation"></i> 2 min away</div>
+                    </div>
                     <h3>Go Straight to Your Spot</h3>
                     <p>Turn-by-turn guidance to the best space.</p>
                 </div>
                 <div class="feature-card reveal reveal-delay-2">
-                    <div class="mock-ui mock-timer"><i data-lucide="clock"></i> <span>01:24:00 left</span></div>
+                    <div class="mock-ui mock-timer">
+                        <div class="timer-chip">
+                            <i data-lucide="clock"></i> <span class="time-text">01:24:00 left</span>
+                        </div>
+                        <div class="timer-progress"><div class="timer-fill"></div></div>
+                    </div>
                     <h3>Stay on Time, Every Time</h3>
                     <p>Get alerts before your session ends.</p>
                 </div>
                 <div class="feature-card feat-wide reveal reveal-delay-1">
-                    <div class="feat-wide-text">
-                        <h3>Pay Only for What You Need</h3>
-                        <p>Smart pricing based on time and demand.</p>
-                    </div>
                     <div class="mock-ui mock-chart">
                         <div class="m-bar h-1"></div>
                         <div class="m-bar h-2"></div>
-                        <div class="m-bar h-3"></div>
+                        <div class="m-bar h-3 active-bar"></div>
                         <div class="m-bar h-4"></div>
                     </div>
+                    <h3>Pay Only for What You Need</h3>
+                    <p>Smart pricing based on time and demand.</p>
                 </div>
             </div>
         </div>
@@ -174,9 +184,9 @@
     <section id="how" class="section how-section">
         <div class="container">
             <div class="section-header reveal">
-                <span class="section-tag">How It Works</span>
-                <h2>Three steps to smarter parking</h2>
-                <p>From entry to exit — seamless, automated, effortless.</p>
+                <span class="section-tag">Workflow</span>
+                <h2>Three Steps to Smarter Parking</h2>
+                <p>Automate your entry, navigation, and exit effortlessly.</p>
             </div>
             <div class="steps-track">
                 <div class="steps-line" aria-hidden="true">
@@ -209,10 +219,9 @@
     <section id="pricing" class="section visual-section">
         <div class="container visual-layout">
             <div class="visual-content reveal">
-                <span class="section-tag">Why Us</span>
-                <h2>Built for scale.<br>Designed for simplicity.</h2>
-                <p>Whether you manage 20 spots or 20,000 — our platform adapts. No code required, no hardware lock-in.
-                </p>
+                <span class="section-tag">Platform</span>
+                <h2>Built for Scale. Designed for Simplicity.</h2>
+                <p>Manage any facility size without hardware lock-in or complex coding.</p>
                 <ul class="check-list">
                     <li><i data-lucide="check-circle-2"></i> Cloud-native, zero maintenance</li>
                     <li><i data-lucide="check-circle-2"></i> Works with any sensor hardware</li>
@@ -243,8 +252,9 @@
     <!-- ══════════ CTA ══════════ -->
     <section class="cta-section">
         <div class="container cta-inner reveal">
-            <h2>Start Smarter Parking Today</h2>
-            <p>Join thousands of modern facilities already using our platform.</p>
+            <span class="section-tag">Get Started</span>
+            <h2>Ready for Intelligent Parking?</h2>
+            <p>Join modern facilities optimizing their capacity today.</p>
             <a href="#contact" class="btn btn-white btn-lg btn-pulse">
                 Get Started Now <i data-lucide="arrow-right" class="btn-icon"></i>
             </a>

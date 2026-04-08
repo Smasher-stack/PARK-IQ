@@ -1,0 +1,278 @@
+[
+  {
+    "id": 1,
+    "name": "Central Plaza Parking",
+    "lat": 13.0485,
+    "lng": 80.241,
+    "status": "booked",
+    "availableSlots": 30,
+    "totalSlots": 50,
+    "booking": {
+      "booking_id": "BK1775112823",
+      "parking_name": "Central Plaza Parking",
+      "in_time": "2026-04-02 12:23:43",
+      "valid_till": "2026-04-02 14:23:43"
+    }
+  },
+  {
+    "id": 2,
+    "name": "Marina Beach Lot A",
+    "lat": 13.05,
+    "lng": 80.282,
+    "status": "available",
+    "availableSlots": 40,
+    "totalSlots": 120
+  },
+  {
+    "id": 3,
+    "name": "T-Nagar Hub",
+    "lat": 13.04,
+    "lng": 80.233,
+    "status": "limited",
+    "availableSlots": 4,
+    "totalSlots": 30
+  },
+  {
+    "id": 4,
+    "name": "Express Avenue Mall",
+    "lat": 13.0586,
+    "lng": 80.2642,
+    "status": "limited",
+    "availableSlots": 5,
+    "totalSlots": 200
+  },
+  {
+    "id": 5,
+    "name": "Besant Nagar Beach",
+    "lat": 13.0003,
+    "lng": 80.273,
+    "status": "available",
+    "availableSlots": 28,
+    "totalSlots": 60
+  },
+  {
+    "id": 6,
+    "name": "Anna Nagar Tower Park",
+    "lat": 13.0845,
+    "lng": 80.2173,
+    "status": "available",
+    "availableSlots": 15,
+    "totalSlots": 40
+  },
+  {
+    "id": 7,
+    "name": "Nungambakkam High Road",
+    "lat": 13.0594,
+    "lng": 80.2458,
+    "status": "limited",
+    "availableSlots": 5,
+    "totalSlots": 35
+  },
+  {
+    "id": 8,
+    "name": "Phoenix Marketcity",
+    "lat": 12.9915,
+    "lng": 80.2166,
+    "status": "available",
+    "availableSlots": 85,
+    "totalSlots": 500
+  },
+  {
+    "id": 9,
+    "name": "Guindy Metro Parking",
+    "lat": 13.0068,
+    "lng": 80.2057,
+    "status": "available",
+    "availableSlots": 80,
+    "totalSlots": 100
+  },
+  {
+    "id": 10,
+    "name": "VR Mall Chennai",
+    "lat": 13.0841,
+    "lng": 80.1974,
+    "status": "limited",
+    "availableSlots": 8,
+    "totalSlots": 800
+  },
+  {
+    "id": 11,
+    "name": "Thiruvanmiyur MRTS",
+    "lat": 12.9856,
+    "lng": 80.252,
+    "status": "available",
+    "availableSlots": 32,
+    "totalSlots": 150
+  },
+  {
+    "id": 12,
+    "name": "G.N. Chetty Road Parking",
+    "lat": 13.045,
+    "lng": 80.244,
+    "status": "available",
+    "availableSlots": 30,
+    "totalSlots": 50
+  },
+  {
+    "id": 13,
+    "name": "Pondy Bazaar Parking",
+    "lat": 13.0435,
+    "lng": 80.238,
+    "status": "available",
+    "availableSlots": 45,
+    "totalSlots": 80
+  },
+  {
+    "id": 14,
+    "name": "Vidyodaya School Lot",
+    "lat": 13.0495,
+    "lng": 80.2455,
+    "status": "available",
+    "availableSlots": 20,
+    "totalSlots": 40
+  },
+  {
+    "id": 15,
+    "name": "Ashok Nagar Metro Lot",
+    "lat": 13.035,
+    "lng": 80.215,
+    "status": "available",
+    "availableSlots": 45,
+    "totalSlots": 120
+  },
+  {
+    "id": 16,
+    "name": "EA Mall Basement 2",
+    "lat": 13.057,
+    "lng": 80.264,
+    "status": "booked",
+    "availableSlots": 0,
+    "totalSlots": 300
+  },
+  {
+    "id": 17,
+    "name": "Koyambedu CMBT Parking",
+    "lat": 13.069,
+    "lng": 80.203,
+    "status": "available",
+    "availableSlots": 120,
+    "totalSlots": 500
+  },
+  {
+    "id": 18,
+    "name": "Adyar Signal Parking",
+    "lat": 13.003,
+    "lng": 80.257,
+    "status": "limited",
+    "availableSlots": 6,
+    "totalSlots": 45
+  },
+  {
+    "id": 19,
+    "name": "Egmore Railway Hub",
+    "lat": 13.078,
+    "lng": 80.26,
+    "status": "booked",
+    "availableSlots": 0,
+    "totalSlots": 150
+  },
+  {
+    "id": 20,
+    "name": "Forum Mall",
+    "lat": 13.049,
+    "lng": 80.209,
+    "status": "available",
+    "availableSlots": 35,
+    "totalSlots": 250
+  },
+  {
+    "id": 21,
+    "name": "Chrompet Railway Station",
+    "lat": 12.9517,
+    "lng": 80.1406,
+    "status": "available",
+    "availableSlots": 42,
+    "totalSlots": 120
+  },
+  {
+    "id": 22,
+    "name": "Pallavaram Radial Road Lot",
+    "lat": 12.9654,
+    "lng": 80.1462,
+    "status": "booked",
+    "availableSlots": 0,
+    "totalSlots": 60
+  },
+  {
+    "id": 23,
+    "name": "MIT Gate Parking",
+    "lat": 12.9481,
+    "lng": 80.1397,
+    "status": "limited",
+    "availableSlots": 4,
+    "totalSlots": 80
+  },
+  {
+    "id": 24,
+    "name": "Saravana Stores Chrompet",
+    "lat": 12.9516,
+    "lng": 80.141,
+    "status": "available",
+    "availableSlots": 62,
+    "totalSlots": 200
+  },
+  {
+    "id": 25,
+    "name": "Chrompet Bus Stand Parking",
+    "lat": 12.9526,
+    "lng": 80.1405,
+    "status": "limited",
+    "availableSlots": 5,
+    "totalSlots": 40
+  },
+  {
+    "id": 26,
+    "name": "Semmancheri IT Hub",
+    "lat": 12.865,
+    "lng": 80.225,
+    "status": "available",
+    "availableSlots": 125,
+    "totalSlots": 400
+  },
+  {
+    "id": 27,
+    "name": "Navalur Junction Plaza",
+    "lat": 12.8515,
+    "lng": 80.2275,
+    "status": "limited",
+    "availableSlots": 8,
+    "totalSlots": 60
+  },
+  {
+    "id": 28,
+    "name": "Siruseri SEZ Parking",
+    "lat": 12.835,
+    "lng": 80.215,
+    "status": "available",
+    "availableSlots": 45,
+    "totalSlots": 100
+  },
+  {
+    "id": 29,
+    "name": "Thalambur Tech Lot",
+    "lat": 12.845,
+    "lng": 80.21,
+    "status": "booked",
+    "availableSlots": 0,
+    "totalSlots": 85
+  },
+  {
+    "id": 30,
+    "name": "OMR Food Street Lot",
+    "lat": 12.8575,
+    "lng": 80.224,
+    "status": "available",
+    "availableSlots": 90,
+    "totalSlots": 250
+  }
+]

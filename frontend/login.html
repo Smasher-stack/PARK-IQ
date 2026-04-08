@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ParkIQ — Authentication</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz,wght@6..12,300;6..12,400;6..12,500;6..12,600;6..12,700;6..12,800;6..12,900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .auth-wrapper {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, var(--bg) 0%, #e2e8f0 100%);
+        }
+        .auth-card {
+            background: var(--card);
+            border-radius: var(--r-card);
+            box-shadow: var(--shadow-xl);
+            width: 100%;
+            max-width: 440px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+        .auth-header {
+            padding: 40px 40px 20px;
+            text-align: center;
+        }
+        .auth-header .logo {
+            justify-content: center;
+            margin-bottom: 16px;
+            font-size: 1.6rem;
+        }
+        .auth-header h2 {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--text);
+            margin-bottom: 8px;
+        }
+        .auth-header p {
+            color: var(--text-sec);
+            font-size: 0.95rem;
+        }
+        .auth-body {
+            padding: 0 40px 40px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: 700;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            color: var(--text);
+        }
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1.5px solid var(--border);
+            border-radius: var(--r-sm);
+            font-family: var(--font);
+            font-size: 1rem;
+            transition: all 0.2s var(--ease);
+            background: var(--bg);
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px var(--accent-soft);
+            background: #fff;
+        }
+        .auth-btn {
+            width: 100%;
+            padding: 14px;
+            font-size: 1rem;
+            margin-top: 10px;
+        }
+        .auth-footer {
+            text-align: center;
+            margin-top: 24px;
+            font-size: 0.95rem;
+            color: var(--text-sec);
+        }
+        .auth-link {
+            color: var(--accent);
+            font-weight: 800;
+            cursor: pointer;
+            text-decoration: underline;
+            text-decoration-color: transparent;
+            transition: all 0.2s;
+        }
+        .auth-link:hover {
+            text-decoration-color: var(--accent);
+        }
+        .toggle-section {
+            display: none;
+        }
+        .toggle-section.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        #authAlert {
+            padding: 12px 16px;
+            border-radius: var(--r-sm);
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: none;
+        }
+        #authAlert.error {
+            background: var(--red-soft);
+            color: var(--red);
+            display: block;
+        }
+        #authAlert.success {
+            background: var(--green-soft);
+            color: var(--green);
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Simple Navbar Link back to Home -->
+    <nav class="navbar" style="position: absolute; background: transparent; box-shadow: none;">
+        <div class="container nav-wrap" style="height: 80px;">
+            <a href="index.html" class="logo">
+                <i data-lucide="arrow-left" style="width: 20px; margin-right: 8px;"></i>
+                <span>Back to Home</span>
+            </a>
+        </div>
+    </nav>
+
+    <div class="auth-wrapper">
+        <div class="auth-card">
+            <div class="auth-header">
+                <a href="index.html" class="logo">
+                    <div class="logo-mark"><i data-lucide="square-parking"></i></div>
+                    <span>ParkIQ</span>
+                </a>
+                <h2 id="authTitle">Welcome Back</h2>
+                <p id="authSubtitle">Enter your credentials to access your account.</p>
+            </div>
+
+            <div class="auth-body">
+                <div id="authAlert"></div>
+
+                <!-- LOGIN FORM -->
+                <form id="loginForm" class="toggle-section active">
+                    <div class="form-group">
+                        <label for="loginEmail">Email Address</label>
+                        <input type="email" id="loginEmail" class="form-control" placeholder="you@example.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="loginPassword">Password</label>
+                        <input type="password" id="loginPassword" class="form-control" placeholder="••••••••" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary auth-btn" id="loginBtn">Log In</button>
+                    <div class="auth-footer">
+                        Don't have an account? <span class="auth-link" onclick="toggleAuth('register')">Register here</span>
+                    </div>
+                </form>
+
+                <!-- REGISTER FORM -->
+                <form id="registerForm" class="toggle-section">
+                    <div class="form-group">
+                        <label for="regName">Full Name</label>
+                        <input type="text" id="regName" class="form-control" placeholder="John Doe" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="regEmail">Email Address</label>
+                        <input type="email" id="regEmail" class="form-control" placeholder="you@example.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="regPassword">Password</label>
+                        <input type="password" id="regPassword" class="form-control" placeholder="Create a password" minlength="6" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="regVehicle">Vehicle Type</label>
+                        <select id="regVehicle" class="form-control">
+                            <option value="car">Car (Standard)</option>
+                            <option value="suv">SUV / Truck</option>
+                            <option value="motorcycle">Motorcycle</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary auth-btn" id="registerBtn">Create Account</button>
+                    <div class="auth-footer">
+                        Already have an account? <span class="auth-link" onclick="toggleAuth('login')">Log In</span>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="login.js"></script>
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>

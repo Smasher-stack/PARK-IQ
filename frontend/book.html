@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Parking - ParkIQ</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz,wght@6..12,300;6..12,400;6..12,500;6..12,600;6..12,700;6..12,800;6..12,900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Modern App-Style Booking Layout */
+        body {
+            background-color: var(--bg);
+            padding-top: 72px; /* For navbar */
+        }
+        
+        .booking-container {
+            max-width: 500px;
+            margin: 40px auto;
+            padding: 0 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .booking-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 8px;
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0,0,0,0.04);
+            transition: background 0.2s;
+        }
+
+        .back-btn:hover {
+            background: rgba(0,0,0,0.08);
+        }
+
+        .booking-header h1 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+
+        .location-section {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding: 24px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .location-section h2 {
+            font-size: 2rem;
+            font-weight: 900;
+            line-height: 1.1;
+            color: var(--text);
+        }
+
+        .location-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-sec);
+            font-weight: 600;
+        }
+
+        .details-section {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            padding: 16px 0;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            background: #fff;
+            border-radius: var(--r-sm);
+            box-shadow: var(--shadow-xs);
+            border: 1px solid var(--border);
+        }
+
+        .detail-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-sec);
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .detail-value {
+            font-weight: 800;
+            font-size: 1rem;
+            color: var(--text);
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: var(--pill);
+            font-size: 0.85rem;
+            font-weight: 700;
+            background: var(--green-soft);
+            color: var(--green);
+        }
+
+        .status-badge.booked {
+            background: var(--red-soft);
+            color: var(--red);
+        }
+
+        .status-badge.limited {
+            background: #fef08a;
+            color: #854d0e;
+        }
+
+        .bottom-action {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: #fff;
+            padding: 20px 24px;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.06);
+            border-top: 1px solid var(--border);
+            z-index: 100;
+            display: flex;
+            justify-content: center;
+        }
+
+        .bottom-action-inner {
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .btn-confirm {
+            width: 100%;
+            padding: 18px;
+            font-size: 1.1rem;
+            border-radius: var(--r-sm);
+        }
+
+        /* Loading State */
+        .loading-shimmer {
+            background: #f6f7f8;
+            background-image: linear-gradient(to right, #f6f7f8 0%, #edeef1 20%, #f6f7f8 40%, #f6f7f8 100%);
+            background-repeat: no-repeat;
+            background-size: 800px 100%; 
+            display: inline-block;
+            position: relative; 
+            animation-duration: 1s;
+            animation-fill-mode: forwards; 
+            animation-iteration-count: infinite;
+            animation-name: placeholderShimmer;
+            animation-timing-function: linear;
+            border-radius: 4px;
+        }
+        
+        @keyframes placeholderShimmer {
+            0% { background-position: -468px 0; }
+            100% { background-position: 468px 0; }
+        }
+
+        #loadingState {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        #errorState {
+            display: none;
+            text-align: center;
+            padding: 40px 0;
+            color: var(--red);
+            font-weight: 600;
+        }
+
+        #contentState {
+            display: none;
+        }
+        
+        /* Ensure there's scroll padding so the fixed button doesn't hide content */
+        .booking-container {
+            padding-bottom: 120px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar scrolled" id="navbar">
+        <div class="container nav-wrap">
+            <a href="index.html#home" class="logo">
+                <div class="logo-mark"><i data-lucide="square-parking"></i></div>
+                <span>ParkIQ</span>
+            </a>
+            <div class="nav-links" id="navLinks">
+                <a href="index.html#home" class="nav-link active">Home</a>
+                <a href="index.html#features" class="nav-link">Features</a>
+                <a href="map.html" target="_blank" class="nav-link"
+                    style="color: var(--accent); font-weight: 800; display: inline-flex; align-items: center; gap: 4px;">Explore
+                    Parking <i data-lucide="external-link" style="width: 14px; height: 14px;"></i></a>
+                <a href="index.html#pricing" class="nav-link">Pricing</a>
+                <a href="index.html#contact" class="nav-link">Contact</a>
+            </div>
+            <div class="nav-right">
+                <a href="index.html#pricing" class="btn btn-primary btn-nav">Get Started</a>
+                <button class="hamburger" id="hamburger" aria-label="Toggle navigation">
+                    <span></span><span></span><span></span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="booking-container">
+        <div class="booking-header">
+            <button class="back-btn" onclick="window.location.href='map.html'">
+                <i data-lucide="arrow-left"></i>
+            </button>
+            <h1>Book Parking</h1>
+        </div>
+
+        <!-- Loading Skeleton -->
+        <div id="loadingState">
+            <div class="loading-shimmer" style="height: 40px; width: 70%; margin: 24px 0 8px;"></div>
+            <div class="loading-shimmer" style="height: 20px; width: 40%; margin-bottom: 24px;"></div>
+            <div class="loading-shimmer" style="height: 60px; width: 100%; border-radius: var(--r-sm);"></div>
+            <div class="loading-shimmer" style="height: 60px; width: 100%; border-radius: var(--r-sm);"></div>
+        </div>
+
+        <!-- Error State -->
+        <div id="errorState">
+            <i data-lucide="alert-circle" style="width: 48px; height: 48px; margin-bottom: 16px;"></i>
+            <p id="errorMsg">Slot not found.</p>
+            <button class="btn btn-primary" onclick="window.location.href='map.html'" style="margin-top: 16px;">Return to Map</button>
+        </div>
+
+        <!-- Success State -->
+        <div id="successState" style="display: none; text-align: center; padding: 20px 0;">
+            <div style="width: 64px; height: 64px; background: var(--green-soft); color: var(--green); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
+                <i data-lucide="check" style="width: 32px; height: 32px;"></i>
+            </div>
+            <h2 style="font-size: 1.8rem; font-weight: 900; color: var(--text); margin-bottom: 8px;">Booking Confirmed!</h2>
+            <p style="color: var(--text-sec); margin-bottom: 24px;">Please keep your ticket handy for entry.</p>
+            
+            <div style="background: white; padding: 24px; border-radius: var(--r-sm); border: 1px solid var(--border); box-shadow: var(--shadow-sm); text-align: left; margin-bottom: 20px;">
+                <div style="font-size: 1.2rem; font-weight: 800; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 12px;" id="tkParkingName">Parking Name</div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <span style="color: var(--text-sec); font-weight: 600;">Booking ID:</span>
+                    <span style="font-weight: 800;" id="tkBookingId">...</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <span style="color: var(--text-sec); font-weight: 600;">Access valid from:</span>
+                    <span style="font-weight: 800;" id="tkInTime">...</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 16px;">
+                    <span style="color: var(--text-sec); font-weight: 600;">Valid until:</span>
+                    <span style="font-weight: 800; color: var(--red);" id="tkValidTill">...</span>
+                </div>
+                
+                <div style="display: flex; justify-content: center; margin-top: 24px;">
+                    <img id="qrCodeImg" src="" alt="Booking Ticket" style="width: 200px; height: 200px; display: block;" />
+                </div>
+                <div style="margin-top: 16px;">
+                    <a id="downloadQrBtn" href="#" download="parkiq-booking-ticket.png" class="btn btn-ghost btn-sm" style="width: 100%; display: flex; justify-content: center; align-items: center; gap: 6px;">
+                        <i data-lucide="download"></i> Download QR
+                    </a>
+                </div>
+            </div>
+
+            <button class="btn btn-primary btn-lg" onclick="window.location.href='map.html'" style="width: 100%;">Back to Map</button>
+        </div>
+
+        <!-- Content -->
+        <div id="contentState">
+            <div class="location-section">
+                <h2 id="slotName">Loading...</h2>
+                <div class="location-meta">
+                    <i data-lucide="map-pin" style="width: 16px; height: 16px;"></i>
+                    <span id="slotCoords">...</span>
+                </div>
+            </div>
+
+            <div class="details-section">
+                <div class="detail-row">
+                    <div class="detail-label">
+                        <i data-lucide="hash"></i> Slot ID
+                    </div>
+                    <div class="detail-value" id="slotIdDisplay">-</div>
+                </div>
+
+                <div class="detail-row">
+                    <div class="detail-label">
+                        <i data-lucide="car"></i> Status
+                    </div>
+                    <div class="detail-value">
+                        <span class="status-badge" id="slotStatus">
+                            <span class="status-dot"></span> <span id="slotStatusText">Available</span>
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="detail-row">
+                    <div class="detail-label">
+                        <i data-lucide="layers"></i> Availability
+                    </div>
+                    <div class="detail-value" id="slotAvailability">-</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bottom-action">
+        <div class="bottom-action-inner">
+            <button class="btn btn-primary btn-confirm" id="confirmBtn" disabled>
+                Confirm Booking
+            </button>
+        </div>
+    </div>
+
+    <script src="booking.js"></script>
+</body>
+</html>
