@@ -18,8 +18,9 @@ async function getUserDashboard(req, res) {
         end_time,
         status,
         qr_code,
-        slot_id,
-        parking_slots ( id, name, latitude, longitude, price )
+        parking_id,
+        price,
+        parking_locations ( id, name, lat, lng, price_per_hour )
       `)
       .eq('user_id', userId)
       .order('start_time', { ascending: false });
@@ -36,13 +37,8 @@ async function getUserDashboard(req, res) {
     // 3. Recent 5 (skip the active one in the list if it's also in recent)
     const recent = (bookings || []).slice(0, 5);
 
-    // 4. Total spend from parking_history
-    const { data: history, error: histErr } = await supabase
-      .from('parking_history')
-      .select('price')
-      .eq('user_id', userId);
-
-    const totalSpent = (history || []).reduce((sum, h) => sum + parseFloat(h.price || 0), 0);
+    // 4. Total spend from all bookings
+    const totalSpent = (bookings || []).reduce((sum, b) => sum + parseFloat(b.price || 0), 0);
 
     return res.json({
       stats: {
@@ -53,9 +49,9 @@ async function getUserDashboard(req, res) {
       activeBooking: activeBooking
         ? {
             id: activeBooking.id,
-            parkingName: activeBooking.parking_slots?.name || 'Unknown',
-            lat: activeBooking.parking_slots?.latitude,
-            lng: activeBooking.parking_slots?.longitude,
+            parkingName: activeBooking.parking_locations?.name || 'Unknown',
+            lat: activeBooking.parking_locations?.lat,
+            lng: activeBooking.parking_locations?.lng,
             startTime: activeBooking.start_time,
             endTime: activeBooking.end_time,
             qrCode: activeBooking.qr_code,
@@ -64,11 +60,11 @@ async function getUserDashboard(req, res) {
         : null,
       recentBookings: recent.map(b => ({
         id: b.id,
-        parkingName: b.parking_slots?.name || `Slot #${b.slot_id}`,
+        parkingName: b.parking_locations?.name || `Parking #${b.parking_id}`,
         date: b.start_time,
-        price: b.parking_slots?.price
-          ? `₹${(parseFloat(b.parking_slots.price) * 2).toFixed(0)}`
-          : '₹60',
+        price: b.price
+          ? `₹${Math.round(parseFloat(b.price))}`
+          : '₹0',
         status: b.status,
       })),
     });
@@ -112,31 +108,33 @@ async function getOwnerDashboard(req, res) {
       });
     }
 
-    // Today's bookings count
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);
 
-    const { data: todayBookings, error: todayErr } = await supabase
+    // Fetch all bookings for these locations to separate today vs total
+    const { data: ownerBookings, error: ownerBookErr } = await supabase
       .from('bookings')
-      .select('id, parking_slots ( price )')
-      .in('slot_id', locationIds)
-      .gte('start_time', todayStart.toISOString())
-      .eq('status', 'confirmed');
+      .select('id, price, start_time, status')
+      .in('parking_id', locationIds)
+      .in('status', ['confirmed', 'completed']);
 
-    // Total earnings from parking_history
-    const { data: earningsData, error: earningsErr } = await supabase
-      .from('parking_history')
-      .select('price')
-      .in('slot_id', locationIds);
+    if (ownerBookErr) throw ownerBookErr;
 
-    const todayEarnings = (todayBookings || []).reduce(
-      (sum, b) => sum + parseFloat(b.parking_slots?.price || 30) * 2,
+    const todayBookings = (ownerBookings || []).filter(
+      b => new Date(b.start_time) >= todayStart
+    );
+
+    const todayEarnings = todayBookings.reduce(
+      (sum, b) => sum + parseFloat(b.price || 0),
       0
     );
-    const totalEarnings = (earningsData || []).reduce(
-      (sum, h) => sum + parseFloat(h.price || 0),
+    const totalEarnings = (ownerBookings || []).reduce(
+      (sum, b) => sum + parseFloat(b.price || 0),
       0
     );
+
+    // Active Users (simplified) approx equal to today's bookings
+    const activeUsers = new Set(todayBookings.map(b => b.id)).size;
 
     return res.json({
       parkingSpaces: (locations || []).map(loc => ({
@@ -149,8 +147,8 @@ async function getOwnerDashboard(req, res) {
         area: loc.area,
         active: true,
       })),
-      bookingsToday: (todayBookings || []).length,
-      activeUsers: (todayBookings || []).length,
+      bookingsToday: todayBookings.length,
+      activeUsers: activeUsers,
       earnings: {
         today: Math.round(todayEarnings),
         total: Math.round(totalEarnings),

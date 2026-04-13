@@ -18,70 +18,11 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 
 
--- ─── 2. PARKING SLOTS TABLE ─────────────────────────────────────────────────
-
-CREATE TABLE IF NOT EXISTS parking_slots (
-  id              INT PRIMARY KEY,
-  name            TEXT        NOT NULL,
-  latitude        DOUBLE PRECISION NOT NULL,
-  longitude       DOUBLE PRECISION NOT NULL,
-  total_slots     INT         NOT NULL DEFAULT 0,
-  available_slots INT         NOT NULL DEFAULT 0,
-  type            TEXT        DEFAULT 'public',       -- 'public' | 'residential'
-  price           NUMERIC(8,2) DEFAULT 30.00          -- price per hour in ₹
-);
-
-
--- ─── 3. BOOKINGS TABLE ──────────────────────────────────────────────────────
-
-CREATE TABLE IF NOT EXISTS bookings (
-  id          BIGSERIAL PRIMARY KEY,
-  user_id     BIGINT      REFERENCES users(id) ON DELETE SET NULL,
-  slot_id     INT         NOT NULL REFERENCES parking_slots(id) ON DELETE CASCADE,
-  start_time  TIMESTAMPTZ NOT NULL DEFAULT now(),
-  end_time    TIMESTAMPTZ NOT NULL,
-  qr_code     TEXT,
-  status      TEXT        DEFAULT 'confirmed'         -- 'confirmed' | 'completed' | 'cancelled'
-);
-
--- Index for user lookups
-CREATE INDEX IF NOT EXISTS idx_bookings_user   ON bookings(user_id);
-CREATE INDEX IF NOT EXISTS idx_bookings_slot   ON bookings(slot_id);
-CREATE INDEX IF NOT EXISTS idx_bookings_status ON bookings(status);
-
-
--- ─── 4. PARKING HISTORY TABLE ────────────────────────────────────────────────
-
-CREATE TABLE IF NOT EXISTS parking_history (
-  id          BIGSERIAL PRIMARY KEY,
-  user_id     BIGINT      REFERENCES users(id) ON DELETE SET NULL,
-  slot_id     INT         NOT NULL REFERENCES parking_slots(id) ON DELETE CASCADE,
-  duration    NUMERIC(6,2) NOT NULL DEFAULT 0,         -- hours
-  price       NUMERIC(10,2) NOT NULL DEFAULT 0,        -- total cost in ₹
-  created_at  TIMESTAMPTZ DEFAULT now()
-);
-
-CREATE INDEX IF NOT EXISTS idx_history_user ON parking_history(user_id);
-
-
--- ─── 5. ROW LEVEL SECURITY (RLS) ────────────────────────────────────────────
--- Using service-role key bypasses RLS, but enable it for future anon access.
-
-ALTER TABLE users           ENABLE ROW LEVEL SECURITY;
-ALTER TABLE parking_slots   ENABLE ROW LEVEL SECURITY;
-ALTER TABLE bookings        ENABLE ROW LEVEL SECURITY;
-ALTER TABLE parking_history ENABLE ROW LEVEL SECURITY;
-
--- Allow service role full access (already the default, but explicit is better)
-CREATE POLICY "Service role full access" ON users           FOR ALL USING (true);
-CREATE POLICY "Service role full access" ON parking_slots   FOR ALL USING (true);
-CREATE POLICY "Service role full access" ON bookings        FOR ALL USING (true);
-CREATE POLICY "Service role full access" ON parking_history FOR ALL USING (true);
-
--- ─── 6. PARKING LOCATIONS TABLE (New Implementation) ─────────────────────────
+-- ─── 2. PARKING LOCATIONS TABLE ──────────────────────────────────────────────
 
 CREATE TABLE IF NOT EXISTS parking_locations (
   id              BIGSERIAL PRIMARY KEY,
+  owner_id        BIGINT REFERENCES users(id) ON DELETE SET NULL,
   name            TEXT        NOT NULL,
   type            TEXT        NOT NULL, -- 'public' | 'residential'
   area            TEXT        NOT NULL,
@@ -94,5 +35,38 @@ CREATE TABLE IF NOT EXISTS parking_locations (
   image_url       TEXT
 );
 
+-- Index for owner lookups
+CREATE INDEX IF NOT EXISTS idx_parking_locations_owner ON parking_locations(owner_id);
+
+
+-- ─── 3. BOOKINGS TABLE ──────────────────────────────────────────────────────
+
+CREATE TABLE IF NOT EXISTS bookings (
+  id          BIGSERIAL PRIMARY KEY,
+  user_id     BIGINT      NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  parking_id  BIGINT      NOT NULL REFERENCES parking_locations(id) ON DELETE CASCADE,
+  start_time  TIMESTAMPTZ NOT NULL DEFAULT now(),
+  end_time    TIMESTAMPTZ NOT NULL,
+  price       NUMERIC(10,2) NOT NULL DEFAULT 0,
+  qr_code     TEXT,
+  status      TEXT        DEFAULT 'confirmed',         -- 'confirmed' | 'completed' | 'cancelled'
+  created_at  TIMESTAMPTZ DEFAULT now()
+);
+
+-- Index for user and parking lookups
+CREATE INDEX IF NOT EXISTS idx_bookings_user    ON bookings(user_id);
+CREATE INDEX IF NOT EXISTS idx_bookings_parking ON bookings(parking_id);
+CREATE INDEX IF NOT EXISTS idx_bookings_status  ON bookings(status);
+
+
+-- ─── 4. ROW LEVEL SECURITY (RLS) ────────────────────────────────────────────
+-- Using service-role key bypasses RLS, but enable it for future anon access.
+
+ALTER TABLE users             ENABLE ROW LEVEL SECURITY;
 ALTER TABLE parking_locations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE bookings          ENABLE ROW LEVEL SECURITY;
+
+-- Allow service role full access (already the default, but explicit is better)
+CREATE POLICY "Service role full access" ON users             FOR ALL USING (true);
 CREATE POLICY "Service role full access" ON parking_locations FOR ALL USING (true);
+CREATE POLICY "Service role full access" ON bookings          FOR ALL USING (true);

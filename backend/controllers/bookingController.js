@@ -4,7 +4,6 @@
 const supabase = require('../config/supabaseClient');
 const { generateQR } = require('../services/qrService');
 
-// GET /api/history/:userId — Get booking history for a user
 const fs = require('fs');
 const path = require('path');
 
@@ -15,6 +14,10 @@ async function createBooking(req, res) {
 
     if (!id) {
       return res.status(400).json({ error: 'Missing slot id.' });
+    }
+    
+    if (!user_id) {
+      return res.status(401).json({ error: 'User must be authenticated.' });
     }
 
     let slot = null;
@@ -77,8 +80,9 @@ async function createBooking(req, res) {
         const { data: booking, error: bookErr } = await supabase
           .from('bookings')
           .insert({
-            user_id: user_id || null,
-            slot_id: slot.id,
+            user_id: user_id,
+            parking_id: slot.id,
+            price: totalPrice,
             start_time: now.toISOString(),
             end_time: endTime.toISOString(),
             status: 'confirmed',
@@ -89,13 +93,6 @@ async function createBooking(req, res) {
 
         if (bookErr) throw bookErr;
 
-        // Log to history
-        await supabase.from('parking_history').insert({
-          user_id: user_id || null,
-          slot_id: slot.id,
-          duration: durationHours,
-          price: totalPrice,
-        });
       } catch (insertErr) {
         console.error("DB Insert bypassed:", insertErr.message);
       }
@@ -143,25 +140,49 @@ async function getHistory(req, res) {
     const { userId } = req.params;
 
     const { data, error } = await supabase
-      .from('parking_history')
+      .from('bookings')
       .select(`
         id,
-        duration,
         price,
+        start_time,
+        end_time,
         created_at,
-        parking_slots (
+        parking_locations (
           id,
           name,
-          latitude,
-          longitude
+          lat,
+          lng
         )
       `)
       .eq('user_id', userId)
+      .in('status', ['completed', 'cancelled'])
       .order('created_at', { ascending: false });
 
     if (error) throw error;
 
-    return res.json(data);
+    // Transform for backwards compatibility with frontend expectation
+    const transformed = (data || []).map(b => {
+      // Calculate duration manually if historical format expected
+      const start = new Date(b.start_time);
+      const end = new Date(b.end_time);
+      let durationHours = (end - start) / (1000 * 60 * 60);
+
+      // Provide fallback alias `parking_slots`
+      return {
+        id: b.id,
+        price: b.price,
+        duration: durationHours,
+        created_at: b.created_at,
+        parking_slots: {
+          id: b.parking_locations?.id,
+          name: b.parking_locations?.name,
+          latitude: b.parking_locations?.lat,
+          longitude: b.parking_locations?.lng
+        }
+      };
+    });
+
+    return res.json(transformed);
   } catch (err) {
     console.error('getHistory error:', err.message);
     return res.status(500).json({ error: 'Failed to fetch history.' });
@@ -181,11 +202,11 @@ async function getActiveBookings(req, res) {
         end_time,
         status,
         qr_code,
-        parking_slots (
+        parking_locations (
           id,
           name,
-          latitude,
-          longitude
+          lat,
+          lng
         )
       `)
       .eq('user_id', userId)
@@ -194,7 +215,17 @@ async function getActiveBookings(req, res) {
 
     if (error) throw error;
 
-    return res.json(data);
+    const transformed = (data || []).map(b => ({
+      ...b,
+      parking_slots: {
+         id: b.parking_locations?.id,
+         name: b.parking_locations?.name,
+         latitude: b.parking_locations?.lat,
+         longitude: b.parking_locations?.lng
+      }
+    }));
+
+    return res.json(transformed);
   } catch (err) {
     console.error('getActiveBookings error:', err.message);
     return res.status(500).json({ error: 'Failed to fetch bookings.' });
