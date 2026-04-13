@@ -90,28 +90,44 @@ async function getUserDashboard(req, res) {
 // GET /api/dashboard/owner  (requires auth)
 async function getOwnerDashboard(req, res) {
   try {
-    // Fetch all parking locations (in a real app filtered by owner_id)
+    const userId = req.user.id;
+
+    // Fetch all parking locations OWNED by this user
     const { data: locations, error: locErr } = await supabase
       .from('parking_locations')
       .select('*')
+      .eq('owner_id', userId)
       .order('id', { ascending: true });
 
     if (locErr) throw locErr;
 
-    // Today's bookings count (from bookings table, status = confirmed, created today)
+    const locationIds = (locations || []).map(loc => loc.id);
+
+    if (locationIds.length === 0) {
+      return res.json({
+        parkingSpaces: [],
+        bookingsToday: 0,
+        activeUsers: 0,
+        earnings: { today: 0, total: 0 },
+      });
+    }
+
+    // Today's bookings count
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);
 
     const { data: todayBookings, error: todayErr } = await supabase
       .from('bookings')
       .select('id, parking_slots ( price )')
+      .in('slot_id', locationIds)
       .gte('start_time', todayStart.toISOString())
       .eq('status', 'confirmed');
 
     // Total earnings from parking_history
     const { data: earningsData, error: earningsErr } = await supabase
       .from('parking_history')
-      .select('price');
+      .select('price')
+      .in('slot_id', locationIds);
 
     const todayEarnings = (todayBookings || []).reduce(
       (sum, b) => sum + parseFloat(b.parking_slots?.price || 30) * 2,

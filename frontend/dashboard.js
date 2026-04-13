@@ -250,8 +250,19 @@
     document.getElementById('ownerBookingsToday').textContent = data.bookingsToday || 0;
     document.getElementById('ownerActiveUsers').textContent = data.activeUsers || 0;
     document.getElementById('ownerTotalEarnings').textContent = `₹${data.earnings?.total || 0}`;
-    document.getElementById('earnToday').textContent = `₹${data.earnings?.today || 0}`;
-    document.getElementById('earnTotal').textContent = `₹${data.earnings?.total || 0}`;
+    
+    const todayEarn = data.earnings?.today || 0;
+    const totalEarn = data.earnings?.total || 0;
+
+    const elToday = document.getElementById('earnToday');
+    const elTotal = document.getElementById('earnTotal');
+    
+    elToday.textContent = `₹${todayEarn}`;
+    elToday.nextElementSibling.textContent = todayEarn === 0 ? "No earnings yet" : "From active bookings";
+
+    elTotal.textContent = `₹${totalEarn}`;
+    elTotal.nextElementSibling.textContent = totalEarn === 0 ? "No earnings yet" : "Total revenue";
+
     lucide.createIcons();
   }
 
@@ -313,12 +324,56 @@
       submitBtn.textContent = 'Creating...';
 
       try {
+        const locationInput = document.getElementById('apLocation').value.trim();
+        let parsedLat, parsedLng;
+
+        // Check for Google Maps Links
+        const gmapsRegex = /@(-?\d+\.\d+),(-?\d+\.\d+)/;
+        const qRegex = /[?&]q=(-?\d+\.\d+),(-?\d+\.\d+)/;
+        const searchRegex = /search\/(-?\d+\.\d+),(-?\d+\.\d+)/;
+        
+        let match = locationInput.match(gmapsRegex) || locationInput.match(qRegex) || locationInput.match(searchRegex);
+        
+        if (match) {
+          parsedLat = parseFloat(match[1]);
+          parsedLng = parseFloat(match[2]);
+        } else {
+          // Use OpenRouteService Geocoding for plaintext addresses
+          try {
+            submitBtn.textContent = 'Locating...';
+            const geocodeUrl = `https://api.openrouteservice.org/geocode/search?api_key=5b3ce3597851110001cf62486eb79383db76435ba52d7e007d4b4ecc&text=${encodeURIComponent(locationInput)}`;
+            const geoRes = await fetch(geocodeUrl);
+            const geoData = await geoRes.json();
+            
+            if (geoData.features && geoData.features.length > 0) {
+              const coords = geoData.features[0].geometry.coordinates; // [lng, lat]
+              parsedLat = coords[1];
+              parsedLng = coords[0];
+            } else {
+              throw new Error('Location not found');
+            }
+          } catch (geoErr) {
+            alert('Invalid location. Could not determine coordinates for that address.');
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Create Parking Space';
+            return;
+          }
+        }
+
+        if (isNaN(parsedLat) || isNaN(parsedLng)) {
+            alert('Invalid coordinates parsed from location.');
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Create Parking Space';
+            return;
+        }
+
+        submitBtn.textContent = 'Saving...';
         const body = {
           name: document.getElementById('apName').value,
           total_slots: parseInt(document.getElementById('apSlots').value),
           price_per_hour: parseFloat(document.getElementById('apPrice').value),
-          lat: document.getElementById('apLat').value,
-          lng: document.getElementById('apLng').value,
+          lat: parsedLat,
+          lng: parsedLng,
           type: document.getElementById('apType').value,
         };
 
