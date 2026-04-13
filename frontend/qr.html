@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ParkIQ - Entry Pass</title>
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700;6..12,800;6..12,900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg: #2563eb;
+            --surface: #ffffff;
+            --text: #111111;
+            --text-sec: #71717a;
+            --border: #e4e4e7;
+            --primary: #1a1a1a;
+            --primary-hover: #333333;
+            --radius-lg: 20px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Nunito Sans', sans-serif; background-color: var(--bg); display: flex; flex-direction: column; min-height: 100vh; }
+        
+        .navbar {
+            padding: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .navbar a { text-decoration: none; color: white; display: flex; align-items: center; gap: 8px; font-weight: 900; font-size: 1.4rem; letter-spacing: -0.02em; }
+        
+        .container { flex: 1; display: flex; justify-content: center; align-items: flex-start; padding: 20px; }
+        
+        .pass-card {
+            background: var(--surface);
+            width: 100%;
+            max-width: 380px;
+            border-radius: var(--radius-lg);
+            box-shadow: 0 12px 32px rgba(0,0,0,0.25);
+            overflow: hidden;
+            text-align: center;
+            position: relative;
+        }
+
+        /* Top Header */
+        .pass-header { background: #1a1a1a; color: white; padding: 30px 20px; }
+        .pass-header i { color: #4ade80; margin-bottom: 12px; }
+        .pass-title { font-size: 1.6rem; font-weight: 900; margin-bottom: 4px; }
+        .pass-subtitle { font-size: 0.9rem; font-weight: 600; color: #a1a1aa; }
+
+        /* Body (QR) */
+        .pass-body { padding: 40px 20px 30px 20px; background: white; }
+        .qr-wrapper {
+            background: white; border: 1px solid var(--border); padding: 15px;
+            border-radius: 12px; display: inline-block; margin-bottom: 24px;
+        }
+        #qrImage { width: 180px; height: 180px; display: block; }
+        
+        .slot-name { font-size: 1.25rem; font-weight: 900; color: var(--text); padding: 0 20px; word-wrap: break-word;}
+        .valid-time { font-size: 0.9rem; font-weight: 700; color: #f59e0b; margin-top: 8px; }
+
+        /* Footer (Action) */
+        .pass-footer { padding: 0 20px 30px 20px; background: white; }
+        .btn-nav {
+            width: 100%; padding: 16px; background: var(--bg); color: white;
+            border: none; border-radius: 12px; font-family: inherit;
+            font-size: 1.05rem; font-weight: 800; cursor: pointer;
+            display: flex; justify-content: center; align-items: center; gap: 8px;
+            transition: background 0.2s, transform 0.1s;
+            text-decoration: none;
+        }
+        .btn-nav:hover { background: #1d4ed8; transform: translateY(-1px); }
+
+        /* Cutouts for ticket effect */
+        .cutout-left, .cutout-right {
+            position: absolute;
+            width: 30px; height: 30px;
+            background: var(--bg);
+            border-radius: 50%;
+            top: 105px; /* Aligned roughly between header and body */
+        }
+        .cutout-left { left: -15px; }
+        .cutout-right { right: -15px; }
+        .dashed-line {
+            position: absolute;
+            top: 120px; left: 20px; right: 20px;
+            height: 1px; border-top: 2px dashed rgba(255,255,255,0.2);
+            z-index: 10;
+        }
+
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="dashboard.html"><i data-lucide="square-parking"></i> ParkIQ</a>
+    </nav>
+
+    <div class="container">
+        <div class="pass-card">
+            <div class="cutout-left"></div>
+            <div class="cutout-right"></div>
+            <div class="dashed-line"></div>
+
+            <div class="pass-header">
+                <i data-lucide="check-circle" style="width: 48px; height: 48px;"></i>
+                <h1 class="pass-title">Spot Reserved</h1>
+                <p class="pass-subtitle">Scan at entry boom barrier</p>
+            </div>
+
+            <div class="pass-body">
+                <div class="qr-wrapper">
+                    <img id="qrImage" src="" alt="Entry Pass QR Code">
+                </div>
+                <div class="slot-name" id="lblSlotName">Loading...</div>
+                <div class="valid-time" id="lblValid">Valid until --:--</div>
+            </div>
+
+            <div class="pass-footer">
+                <button id="navBtn" class="btn-nav">
+                    <i data-lucide="navigation"></i> Start Navigation
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="qr.js"></script>
+</body>
+</html>

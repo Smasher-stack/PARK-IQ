@@ -49,22 +49,23 @@ loginForm.addEventListener('submit', async (e) => {
 
         const data = await response.json();
 
-        if (!response.ok) throw new Error(data.error || 'Login failed');
+        if (!response.ok) {
+            throw new Error(data.error || 'Login failed');
+        }
 
         // Store standard web token securely in local storage
         localStorage.setItem('token', data.token);
-        localStorage.setItem('user', JSON.stringify(data.user));
+        if (data.user) {
+            localStorage.setItem('user', JSON.stringify(data.user));
+        }
 
         showAlert('Login successful! Redirecting...', 'success');
         
-        // Return to map or explicit redirect query params
-        const urlParams = new URLSearchParams(window.location.search);
-        const redirect = urlParams.get('redirect') || 'map.html';
-        
-        setTimeout(() => window.location.href = redirect, 1000);
+        window.location.href = 'dashboard.html';
 
     } catch (err) {
         showAlert(err.message, 'error');
+    } finally {
         btn.innerHTML = 'Log In';
         btn.disabled = false;
     }

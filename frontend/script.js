@@ -162,6 +162,48 @@
     chartObs.observe(viChart);
   }
 
+  /* ═══════════════════════════════════════════════
+     10 — DYNAMIC CTA BUTTONS (AUTH GUARD)
+     ═══════════════════════════════════════════════ */
+  const ctaButtons = document.querySelectorAll('a[href="map.html"], button.btn-glow, a[href="#pricing"], a[href="#contact"]');
+  ctaButtons.forEach(btn => {
+    // Only target buttons that are intended to redirect to the core app flow
+    if(btn.textContent.toLowerCase().includes('explore') || 
+       btn.textContent.toLowerCase().includes('find') || 
+       btn.textContent.toLowerCase().includes('get started')) {
+      
+      btn.addEventListener('click', function(e) {
+        e.preventDefault(); // Stop default anchor
+        const token = localStorage.getItem('token') || localStorage.getItem('supabase.auth.token') || localStorage.getItem('parkiq_token');
+        if (token) {
+          window.location.href = 'map.html';
+        } else {
+          window.location.href = 'login.html?redirect=map.html';
+        }
+      });
+    }
+  });
 
+  /* ═══════════════════════════════════════════════
+     11 — VIDEO MODAL CONTROLS
+     ═══════════════════════════════════════════════ */
+  window.openVideoModal = function() {
+    const modal = document.getElementById('videoModal');
+    const video = document.getElementById('demoVideo');
+    if (modal && video) {
+      modal.classList.add('active');
+      video.play();
+    }
+  };
+
+  window.closeVideoModal = function() {
+    const modal = document.getElementById('videoModal');
+    const video = document.getElementById('demoVideo');
+    if (modal && video) {
+      modal.classList.remove('active');
+      video.pause();
+      video.currentTime = 0; // reset
+    }
+  };
 
 })();

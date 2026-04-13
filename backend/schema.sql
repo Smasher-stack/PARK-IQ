@@ -77,3 +77,22 @@ CREATE POLICY "Service role full access" ON users           FOR ALL USING (true)
 CREATE POLICY "Service role full access" ON parking_slots   FOR ALL USING (true);
 CREATE POLICY "Service role full access" ON bookings        FOR ALL USING (true);
 CREATE POLICY "Service role full access" ON parking_history FOR ALL USING (true);
+
+-- ─── 6. PARKING LOCATIONS TABLE (New Implementation) ─────────────────────────
+
+CREATE TABLE IF NOT EXISTS parking_locations (
+  id              BIGSERIAL PRIMARY KEY,
+  name            TEXT        NOT NULL,
+  type            TEXT        NOT NULL, -- 'public' | 'residential'
+  area            TEXT        NOT NULL,
+  lat             DOUBLE PRECISION NOT NULL,
+  lng             DOUBLE PRECISION NOT NULL,
+  total_slots     INT         NOT NULL DEFAULT 0,
+  available_slots INT         NOT NULL DEFAULT 0,
+  price_per_hour  NUMERIC(8,2) DEFAULT 0,
+  vehicle_type    TEXT        DEFAULT 'car',
+  image_url       TEXT
+);
+
+ALTER TABLE parking_locations ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Service role full access" ON parking_locations FOR ALL USING (true);

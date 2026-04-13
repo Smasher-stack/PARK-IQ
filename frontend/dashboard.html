@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ParkIQ — Dashboard</title>
+    <meta name="description" content="Manage your parking bookings, view activity, and control your parking spaces.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700;6..12,800;6..12,900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <link rel="stylesheet" href="dashboard.css">
+</head>
+
+<body>
+
+    <!-- ══════════ NAVBAR ══════════ -->
+    <nav class="navbar" id="navbar">
+        <a href="index.html" class="logo">
+            <div class="logo-mark"><i data-lucide="square-parking"></i></div>
+            <span>ParkIQ</span>
+        </a>
+        <div class="nav-links">
+            <a href="index.html" class="nav-link">Home</a>
+            <a href="map.html" class="nav-link">Explore</a>
+            <a href="dashboard.html" class="nav-link active">Dashboard</a>
+        </div>
+        <div class="nav-right">
+            <div class="nav-user" id="navUser">
+                <div class="nav-avatar" id="navAvatar">—</div>
+                <span id="navName">Loading...</span>
+            </div>
+            <button class="btn-logout" id="logoutBtn">Log Out</button>
+        </div>
+    </nav>
+
+    <!-- ══════════ MAIN DASHBOARD ══════════ -->
+    <main class="dash-layout">
+
+        <!-- Header + Role Toggle -->
+        <div class="dash-header">
+            <div class="dash-greeting">
+                <h1 id="greetingText">Good morning</h1>
+                <p id="greetingSub">Here's your parking overview</p>
+            </div>
+            <div class="role-toggle" id="roleToggle">
+                <button class="role-tab active" data-role="driver">Driver</button>
+                <button class="role-tab" data-role="owner">Owner</button>
+            </div>
+        </div>
+
+        <!-- ══════════ DRIVER SECTION ══════════ -->
+        <div id="driverSection">
+
+            <!-- Stats Cards -->
+            <div class="stats-grid" id="statsGrid">
+                <div class="stat-card accent-blue">
+                    <div class="stat-card-label"><i data-lucide="calendar"></i> Total Bookings</div>
+                    <div class="stat-card-value" id="statBookings">
+                        <div class="skeleton skel-stat"></div>
+                    </div>
+                    <div class="stat-card-sub">All time</div>
+                </div>
+                <div class="stat-card accent-green">
+                    <div class="stat-card-label"><i data-lucide="zap"></i> Active Session</div>
+                    <div class="stat-card-value" id="statActive">
+                        <div class="skeleton skel-stat"></div>
+                    </div>
+                    <div class="stat-card-sub">Currently parked</div>
+                </div>
+                <div class="stat-card accent-amber">
+                    <div class="stat-card-label"><i data-lucide="wallet"></i> Total Spent</div>
+                    <div class="stat-card-value" id="statSpent">
+                        <div class="skeleton skel-stat"></div>
+                    </div>
+                    <div class="stat-card-sub">All time</div>
+                </div>
+            </div>
+
+            <!-- Active Booking -->
+            <div class="section-title"><i data-lucide="car"></i> Active Booking</div>
+            <div id="activeBookingArea">
+                <div class="empty-state">
+                    <div class="skeleton skel-stat" style="margin: 0 auto 8px; width: 40%;"></div>
+                    <div class="skeleton skel-line" style="margin: 0 auto; width: 60%;"></div>
+                </div>
+            </div>
+
+            <!-- Recent + Quick Actions -->
+            <div class="two-col">
+                <!-- Recent Bookings -->
+                <div class="card">
+                    <div class="section-title"><i data-lucide="clock"></i> Recent Bookings</div>
+                    <div id="recentBookingsArea">
+                        <div class="skeleton skel-line"></div>
+                        <div class="skeleton skel-line" style="width:70%;"></div>
+                        <div class="skeleton skel-line-sm"></div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="card">
+                    <div class="section-title"><i data-lucide="layout-grid"></i> Quick Actions</div>
+                    <div class="action-grid">
+                        <a href="map.html" class="action-btn">
+                            <i data-lucide="map-pin"></i> Find Parking
+                        </a>
+                        <a href="#" class="action-btn" id="viewHistoryBtn">
+                            <i data-lucide="history"></i> View History
+                        </a>
+                        <a href="#" class="action-btn" id="updateProfileBtn">
+                            <i data-lucide="user-cog"></i> Profile
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══════════ OWNER SECTION ══════════ -->
+        <div id="ownerSection" style="display: none;">
+
+            <!-- Owner Stats -->
+            <div class="stats-grid" id="ownerStatsGrid">
+                <div class="stat-card accent-blue">
+                    <div class="stat-card-label"><i data-lucide="ticket"></i> Bookings Today</div>
+                    <div class="stat-card-value" id="ownerBookingsToday">0</div>
+                    <div class="stat-card-sub">Reservations received</div>
+                </div>
+                <div class="stat-card accent-green">
+                    <div class="stat-card-label"><i data-lucide="users"></i> Active Users</div>
+                    <div class="stat-card-value" id="ownerActiveUsers">0</div>
+                    <div class="stat-card-sub">Currently parked</div>
+                </div>
+                <div class="stat-card accent-amber">
+                    <div class="stat-card-label"><i data-lucide="indian-rupee"></i> Total Earnings</div>
+                    <div class="stat-card-value" id="ownerTotalEarnings">₹0</div>
+                    <div class="stat-card-sub">All time</div>
+                </div>
+            </div>
+
+            <!-- Earnings Detail -->
+            <div class="card" style="margin-bottom: 24px;">
+                <div class="section-title"><i data-lucide="trending-up"></i> Earnings</div>
+                <div class="earnings-grid">
+                    <div class="earn-card">
+                        <div class="earn-label">Today</div>
+                        <div class="earn-value" id="earnToday">₹0</div>
+                        <div class="earn-sub">From active bookings</div>
+                    </div>
+                    <div class="earn-card">
+                        <div class="earn-label">All Time</div>
+                        <div class="earn-value" id="earnTotal">₹0</div>
+                        <div class="earn-sub">Total revenue</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- My Parking Spaces -->
+            <div class="owner-header-row">
+                <div class="section-title" style="margin-bottom:0;"><i data-lucide="square-parking"></i> My Parking Spaces</div>
+                <button class="btn-add" id="addParkingBtn">
+                    <i data-lucide="plus"></i> Add Parking
+                </button>
+            </div>
+            <div class="parking-list" id="parkingListArea">
+                <div class="empty-state">Loading parking spaces...</div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- ══════════ ADD PARKING MODAL ══════════ -->
+    <div class="modal-backdrop" id="addParkingModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Add New Parking Space</h2>
+                <button class="modal-close" id="closeModal"><i data-lucide="x"></i></button>
+            </div>
+            <form id="addParkingForm">
+                <div class="form-group">
+                    <label for="apName">Parking Name</label>
+                    <input type="text" class="form-input" id="apName" placeholder="e.g. My Garage" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="apSlots">Total Slots</label>
+                        <input type="number" class="form-input" id="apSlots" placeholder="10" min="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="apPrice">Price (₹/hr)</label>
+                        <input type="number" class="form-input" id="apPrice" placeholder="20" min="1" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="apLat">Latitude</label>
+                        <input type="text" class="form-input" id="apLat" placeholder="12.9516" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="apLng">Longitude</label>
+                        <input type="text" class="form-input" id="apLng" placeholder="80.1462" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="apType">Type</label>
+                    <select class="form-input" id="apType">
+                        <option value="public">Public</option>
+                        <option value="residential">Residential</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-submit" id="apSubmitBtn">Create Parking Space</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="dashboard.js"></script>
+</body>
+
+</html>

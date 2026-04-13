@@ -1,278 +1,52 @@
 [
-  {
-    "id": 1,
-    "name": "Central Plaza Parking",
-    "lat": 13.0485,
-    "lng": 80.241,
-    "status": "booked",
-    "availableSlots": 30,
-    "totalSlots": 50,
-    "booking": {
-      "booking_id": "BK1775112823",
-      "parking_name": "Central Plaza Parking",
-      "in_time": "2026-04-02 12:23:43",
-      "valid_till": "2026-04-02 14:23:43"
-    }
-  },
-  {
-    "id": 2,
-    "name": "Marina Beach Lot A",
-    "lat": 13.05,
-    "lng": 80.282,
-    "status": "available",
-    "availableSlots": 40,
-    "totalSlots": 120
-  },
-  {
-    "id": 3,
-    "name": "T-Nagar Hub",
-    "lat": 13.04,
-    "lng": 80.233,
-    "status": "limited",
-    "availableSlots": 4,
-    "totalSlots": 30
-  },
-  {
-    "id": 4,
-    "name": "Express Avenue Mall",
-    "lat": 13.0586,
-    "lng": 80.2642,
-    "status": "limited",
-    "availableSlots": 5,
-    "totalSlots": 200
-  },
-  {
-    "id": 5,
-    "name": "Besant Nagar Beach",
-    "lat": 13.0003,
-    "lng": 80.273,
-    "status": "available",
-    "availableSlots": 28,
-    "totalSlots": 60
-  },
-  {
-    "id": 6,
-    "name": "Anna Nagar Tower Park",
-    "lat": 13.0845,
-    "lng": 80.2173,
-    "status": "available",
-    "availableSlots": 15,
-    "totalSlots": 40
-  },
-  {
-    "id": 7,
-    "name": "Nungambakkam High Road",
-    "lat": 13.0594,
-    "lng": 80.2458,
-    "status": "limited",
-    "availableSlots": 5,
-    "totalSlots": 35
-  },
-  {
-    "id": 8,
-    "name": "Phoenix Marketcity",
-    "lat": 12.9915,
-    "lng": 80.2166,
-    "status": "available",
-    "availableSlots": 85,
-    "totalSlots": 500
-  },
-  {
-    "id": 9,
-    "name": "Guindy Metro Parking",
-    "lat": 13.0068,
-    "lng": 80.2057,
-    "status": "available",
-    "availableSlots": 80,
-    "totalSlots": 100
-  },
-  {
-    "id": 10,
-    "name": "VR Mall Chennai",
-    "lat": 13.0841,
-    "lng": 80.1974,
-    "status": "limited",
-    "availableSlots": 8,
-    "totalSlots": 800
-  },
-  {
-    "id": 11,
-    "name": "Thiruvanmiyur MRTS",
-    "lat": 12.9856,
-    "lng": 80.252,
-    "status": "available",
-    "availableSlots": 32,
-    "totalSlots": 150
-  },
-  {
-    "id": 12,
-    "name": "G.N. Chetty Road Parking",
-    "lat": 13.045,
-    "lng": 80.244,
-    "status": "available",
-    "availableSlots": 30,
-    "totalSlots": 50
-  },
-  {
-    "id": 13,
-    "name": "Pondy Bazaar Parking",
-    "lat": 13.0435,
-    "lng": 80.238,
-    "status": "available",
-    "availableSlots": 45,
-    "totalSlots": 80
-  },
-  {
-    "id": 14,
-    "name": "Vidyodaya School Lot",
-    "lat": 13.0495,
-    "lng": 80.2455,
-    "status": "available",
-    "availableSlots": 20,
-    "totalSlots": 40
-  },
-  {
-    "id": 15,
-    "name": "Ashok Nagar Metro Lot",
-    "lat": 13.035,
-    "lng": 80.215,
-    "status": "available",
-    "availableSlots": 45,
-    "totalSlots": 120
-  },
-  {
-    "id": 16,
-    "name": "EA Mall Basement 2",
-    "lat": 13.057,
-    "lng": 80.264,
-    "status": "booked",
-    "availableSlots": 0,
-    "totalSlots": 300
-  },
-  {
-    "id": 17,
-    "name": "Koyambedu CMBT Parking",
-    "lat": 13.069,
-    "lng": 80.203,
-    "status": "available",
-    "availableSlots": 120,
-    "totalSlots": 500
-  },
-  {
-    "id": 18,
-    "name": "Adyar Signal Parking",
-    "lat": 13.003,
-    "lng": 80.257,
-    "status": "limited",
-    "availableSlots": 6,
-    "totalSlots": 45
-  },
-  {
-    "id": 19,
-    "name": "Egmore Railway Hub",
-    "lat": 13.078,
-    "lng": 80.26,
-    "status": "booked",
-    "availableSlots": 0,
-    "totalSlots": 150
-  },
-  {
-    "id": 20,
-    "name": "Forum Mall",
-    "lat": 13.049,
-    "lng": 80.209,
-    "status": "available",
-    "availableSlots": 35,
-    "totalSlots": 250
-  },
-  {
-    "id": 21,
-    "name": "Chrompet Railway Station",
-    "lat": 12.9517,
-    "lng": 80.1406,
-    "status": "available",
-    "availableSlots": 42,
-    "totalSlots": 120
-  },
-  {
-    "id": 22,
-    "name": "Pallavaram Radial Road Lot",
-    "lat": 12.9654,
-    "lng": 80.1462,
-    "status": "booked",
-    "availableSlots": 0,
-    "totalSlots": 60
-  },
-  {
-    "id": 23,
-    "name": "MIT Gate Parking",
-    "lat": 12.9481,
-    "lng": 80.1397,
-    "status": "limited",
-    "availableSlots": 4,
-    "totalSlots": 80
-  },
-  {
-    "id": 24,
-    "name": "Saravana Stores Chrompet",
-    "lat": 12.9516,
-    "lng": 80.141,
-    "status": "available",
-    "availableSlots": 62,
-    "totalSlots": 200
-  },
-  {
-    "id": 25,
-    "name": "Chrompet Bus Stand Parking",
-    "lat": 12.9526,
-    "lng": 80.1405,
-    "status": "limited",
-    "availableSlots": 5,
-    "totalSlots": 40
-  },
-  {
-    "id": 26,
-    "name": "Semmancheri IT Hub",
-    "lat": 12.865,
-    "lng": 80.225,
-    "status": "available",
-    "availableSlots": 125,
-    "totalSlots": 400
-  },
-  {
-    "id": 27,
-    "name": "Navalur Junction Plaza",
-    "lat": 12.8515,
-    "lng": 80.2275,
-    "status": "limited",
-    "availableSlots": 8,
-    "totalSlots": 60
-  },
-  {
-    "id": 28,
-    "name": "Siruseri SEZ Parking",
-    "lat": 12.835,
-    "lng": 80.215,
-    "status": "available",
-    "availableSlots": 45,
-    "totalSlots": 100
-  },
-  {
-    "id": 29,
-    "name": "Thalambur Tech Lot",
-    "lat": 12.845,
-    "lng": 80.21,
-    "status": "booked",
-    "availableSlots": 0,
-    "totalSlots": 85
-  },
-  {
-    "id": 30,
-    "name": "OMR Food Street Lot",
-    "lat": 12.8575,
-    "lng": 80.224,
-    "status": "available",
-    "availableSlots": 90,
-    "totalSlots": 250
-  }
+  { "id": 1, "name": "Chromepet Railway Station Parking", "type": "public", "area": "Chromepet", "lat": 12.9516, "lng": 80.1462, "totalSlots": 80, "availableSlots": 35, "price": 20 },
+  { "id": 2, "name": "Chromepet Bus Stand Lot", "type": "public", "area": "Chromepet", "lat": 12.9530, "lng": 80.1448, "totalSlots": 100, "availableSlots": 42, "price": 15 },
+  { "id": 3, "name": "MIT Gate Surface Parking", "type": "public", "area": "Chromepet", "lat": 12.9485, "lng": 80.1402, "totalSlots": 40, "availableSlots": 15, "price": 20 },
+  { "id": 4, "name": "Kumaran Kundram Temple Lot", "type": "public", "area": "Chromepet", "lat": 12.9460, "lng": 80.1418, "totalSlots": 30, "availableSlots": 10, "price": 10 },
+  { "id": 5, "name": "Saravana Stores Parking", "type": "public", "area": "Chromepet", "lat": 12.9505, "lng": 80.1435, "totalSlots": 150, "availableSlots": 85, "price": 30 },
+  { "id": 6, "name": "Tambaram Railway Station East", "type": "public", "area": "Tambaram", "lat": 12.9230, "lng": 80.1130, "totalSlots": 200, "availableSlots": 120, "price": 20 },
+  { "id": 7, "name": "Tambaram Railway Station West", "type": "public", "area": "Tambaram", "lat": 12.9255, "lng": 80.1085, "totalSlots": 180, "availableSlots": 60, "price": 25 },
+  { "id": 8, "name": "Tambaram MEPZ Parking", "type": "public", "area": "Tambaram", "lat": 12.9365, "lng": 80.1170, "totalSlots": 300, "availableSlots": 150, "price": 40 },
+  { "id": 9, "name": "Hindu Mission Hospital Parking", "type": "public", "area": "Tambaram", "lat": 12.9280, "lng": 80.1115, "totalSlots": 50, "availableSlots": 20, "price": 30 },
+  { "id": 10, "name": "Tambaram Sanatorium Station", "type": "public", "area": "Sanatorium", "lat": 12.9405, "lng": 80.1337, "totalSlots": 90, "availableSlots": 45, "price": 15 },
+  { "id": 11, "name": "TB Hospital Visitor Lot", "type": "public", "area": "Sanatorium", "lat": 12.9388, "lng": 80.1350, "totalSlots": 40, "availableSlots": 30, "price": 20 },
+  { "id": 12, "name": "Pallavaram Railway Station", "type": "public", "area": "Pallavaram", "lat": 12.9682, "lng": 80.1496, "totalSlots": 110, "availableSlots": 40, "price": 20 },
+  { "id": 13, "name": "Pallavaram Cantonment Board", "type": "public", "area": "Pallavaram", "lat": 12.9710, "lng": 80.1550, "totalSlots": 35, "availableSlots": 18, "price": 15 },
+  { "id": 14, "name": "Pallavaram Friday Market", "type": "public", "area": "Pallavaram", "lat": 12.9650, "lng": 80.1420, "totalSlots": 200, "availableSlots": 50, "price": 20 },
+  { "id": 15, "name": "Vels University Public Lot", "type": "public", "area": "Pallavaram", "lat": 12.9590, "lng": 80.1565, "totalSlots": 60, "availableSlots": 25, "price": 30 },
+  { "id": 16, "name": "Chennai Airport Metro Parking", "type": "public", "area": "Pallavaram", "lat": 12.9790, "lng": 80.1630, "totalSlots": 250, "availableSlots": 130, "price": 50 },
+  { "id": 17, "name": "Chitlapakkam Lake View Lot", "type": "public", "area": "Chitlapakkam", "lat": 12.9330, "lng": 80.1380, "totalSlots": 25, "availableSlots": 12, "price": 10 },
+  { "id": 18, "name": "Varadharaja Theatre Parking", "type": "public", "area": "Chitlapakkam", "lat": 12.9360, "lng": 80.1345, "totalSlots": 75, "availableSlots": 30, "price": 25 },
+  { "id": 19, "name": "Vettri Theatres Complex", "type": "public", "area": "Chromepet", "lat": 12.9510, "lng": 80.1420, "totalSlots": 120, "availableSlots": 40, "price": 35 },
+  { "id": 20, "name": "Grand Galada Mall", "type": "public", "area": "Pallavaram", "lat": 12.9705, "lng": 80.1585, "totalSlots": 400, "availableSlots": 210, "price": 50 },
+  { "id": 21, "name": "Chromepet GH Parking", "type": "public", "area": "Chromepet", "lat": 12.9525, "lng": 80.1475, "totalSlots": 60, "availableSlots": 20, "price": 10 },
+  { "id": 22, "name": "Sri Sairam Campus Lot", "type": "public", "area": "Tambaram", "lat": 12.9430, "lng": 80.1140, "totalSlots": 150, "availableSlots": 90, "price": 15 },
+  { "id": 23, "name": "Madras Christian College", "type": "public", "area": "Tambaram", "lat": 12.9200, "lng": 80.1190, "totalSlots": 80, "availableSlots": 40, "price": 20 },
+  { "id": 24, "name": "Tambaram Bus Terminus", "type": "public", "area": "Tambaram", "lat": 12.9235, "lng": 80.1110, "totalSlots": 130, "availableSlots": 50, "price": 20 },
+  { "id": 25, "name": "Hasthinapuram Bus Stand", "type": "public", "area": "Chromepet", "lat": 12.9450, "lng": 80.1520, "totalSlots": 45, "availableSlots": 25, "price": 15 },
+  { "id": 26, "name": "Radha Nagar House Parking", "type": "residential", "area": "Chromepet", "lat": 12.9541, "lng": 80.1415, "totalSlots": 2, "availableSlots": 1, "price": 15 },
+  { "id": 27, "name": "Nehru Nagar Garage", "type": "residential", "area": "Chromepet", "lat": 12.9575, "lng": 80.1380, "totalSlots": 1, "availableSlots": 1, "price": 10 },
+  { "id": 28, "name": "Anna Nagar Ext Driveway", "type": "residential", "area": "Chromepet", "lat": 12.9520, "lng": 80.1360, "totalSlots": 3, "availableSlots": 2, "price": 20 },
+  { "id": 29, "name": "New Colony Residence", "type": "residential", "area": "Chromepet", "lat": 12.9560, "lng": 80.1450, "totalSlots": 2, "availableSlots": 1, "price": 15 },
+  { "id": 30, "name": "Purushotham Nagar Home", "type": "residential", "area": "Chromepet", "lat": 12.9480, "lng": 80.1455, "totalSlots": 1, "availableSlots": 0, "price": 15 },
+  { "id": 31, "name": "Tambaram West Villa", "type": "residential", "area": "Tambaram", "lat": 12.9224, "lng": 80.1060, "totalSlots": 2, "availableSlots": 2, "price": 20 },
+  { "id": 32, "name": "Krishna Nagar Apartment", "type": "residential", "area": "Tambaram", "lat": 12.9195, "lng": 80.1020, "totalSlots": 4, "availableSlots": 1, "price": 15 },
+  { "id": 33, "name": "Lakshmipuram Private Lot", "type": "residential", "area": "Tambaram", "lat": 12.9260, "lng": 80.1005, "totalSlots": 3, "availableSlots": 3, "price": 20 },
+  { "id": 34, "name": "Irumbuliyur House Portico", "type": "residential", "area": "Tambaram", "lat": 12.9150, "lng": 80.1050, "totalSlots": 1, "availableSlots": 1, "price": 10 },
+  { "id": 35, "name": "Selaiyur Independent House", "type": "residential", "area": "Tambaram", "lat": 12.9180, "lng": 80.1350, "totalSlots": 2, "availableSlots": 1, "price": 18 },
+  { "id": 36, "name": "Camp Road Residential", "type": "residential", "area": "Tambaram", "lat": 12.9140, "lng": 80.1420, "totalSlots": 1, "availableSlots": 1, "price": 15 },
+  { "id": 37, "name": "Mahalakshmi Nagar Slot", "type": "residential", "area": "Tambaram", "lat": 12.9110, "lng": 80.1280, "totalSlots": 2, "availableSlots": 0, "price": 20 },
+  { "id": 38, "name": "Poondi Bazaar Backyard", "type": "residential", "area": "Tambaram", "lat": 12.9285, "lng": 80.1165, "totalSlots": 3, "availableSlots": 2, "price": 12 },
+  { "id": 39, "name": "Chitlapakkam South Street", "type": "residential", "area": "Chitlapakkam", "lat": 12.9348, "lng": 80.1363, "totalSlots": 2, "availableSlots": 1, "price": 15 },
+  { "id": 40, "name": "Sembakkam Gate Driveway", "type": "residential", "area": "Chitlapakkam", "lat": 12.9300, "lng": 80.1450, "totalSlots": 1, "availableSlots": 1, "price": 15 },
+  { "id": 41, "name": "Zamin Pallavaram House", "type": "residential", "area": "Pallavaram", "lat": 12.9620, "lng": 80.1480, "totalSlots": 2, "availableSlots": 1, "price": 15 },
+  { "id": 42, "name": "Keelkattalai Safe Park", "type": "residential", "area": "Pallavaram", "lat": 12.9550, "lng": 80.1680, "totalSlots": 3, "availableSlots": 2, "price": 18 },
+  { "id": 43, "name": "Rajendra Nagar Porch", "type": "residential", "area": "Pallavaram", "lat": 12.9690, "lng": 80.1520, "totalSlots": 1, "availableSlots": 1, "price": 12 },
+  { "id": 44, "name": "Sanatorium East Street", "type": "residential", "area": "Sanatorium", "lat": 12.9420, "lng": 80.1355, "totalSlots": 2, "availableSlots": 2, "price": 15 },
+  { "id": 45, "name": "Sanatorium West Home", "type": "residential", "area": "Sanatorium", "lat": 12.9410, "lng": 80.1310, "totalSlots": 1, "availableSlots": 0, "price": 15 },
+  { "id": 46, "name": "Hasthinapuram Backlane", "type": "residential", "area": "Chromepet", "lat": 12.9440, "lng": 80.1490, "totalSlots": 1, "availableSlots": 1, "price": 10 },
+  { "id": 47, "name": "Pammal Main Road House", "type": "residential", "area": "Pallavaram", "lat": 12.9730, "lng": 80.1380, "totalSlots": 3, "availableSlots": 1, "price": 20 },
+  { "id": 48, "name": "Anakaputhur Villa", "type": "residential", "area": "Pallavaram", "lat": 12.9770, "lng": 80.1300, "totalSlots": 2, "availableSlots": 2, "price": 15 },
+  { "id": 49, "name": "Peerkankaranai Home", "type": "residential", "area": "Tambaram", "lat": 12.9090, "lng": 80.0980, "totalSlots": 1, "availableSlots": 1, "price": 12 },
+  { "id": 50, "name": "Perungalathur Driveway", "type": "residential", "area": "Tambaram", "lat": 12.9030, "lng": 80.0930, "totalSlots": 2, "availableSlots": 1, "price": 15 }
 ]

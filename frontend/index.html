@@ -18,7 +18,7 @@
 
 <body>
 
-    <!-- ══════════ NAVBAR ══════════ -->
+
     <nav class="navbar" id="navbar">
         <div class="container nav-wrap">
             <a href="#home" class="logo">
@@ -31,6 +31,7 @@
                 <a href="map.html" target="_blank" class="nav-link"
                     style="color: var(--accent); font-weight: 800; display: inline-flex; align-items: center; gap: 4px;">Explore
                     Parking <i data-lucide="external-link" style="width: 14px; height: 14px;"></i></a>
+                <a href="dashboard.html" class="nav-link">Dashboard</a>
                 <a href="#pricing" class="nav-link">Pricing</a>
                 <a href="#contact" class="nav-link">Contact</a>
             </div>
@@ -47,7 +48,7 @@
     <!-- ══════════ HERO (PRODUCT DESIGN) ══════════ -->
     <section id="home" class="hero product-hero">
         <video autoplay muted loop playsinline class="hero-video">
-            <source src="parking (2).mp4" type="video/mp4">
+            <source src="assets/parking (2).mp4" type="video/mp4">
         </video>
         <div class="hero-overlay"></div>
 
@@ -232,17 +233,21 @@
                     Get Started Free
                 </a>
             </div>
-            <div class="visual-image-wrap reveal reveal-delay-1">
-                <div class="vi-card">
+            <div class="visual-image-wrap reveal reveal-delay-1" style="position: relative; border-radius: 24px; overflow: hidden; cursor: pointer; box-shadow: var(--shadow-xl);" onclick="openVideoModal()">
+                <div class="vi-card" style="pointer-events: none; opacity: 0.9;">
                     <div class="vi-header">
-                        <span class="vi-title"><i data-lucide="bar-chart-3" class="vi-icon"></i> Occupancy
-                            Analytics</span>
+                        <span class="vi-title"><i data-lucide="bar-chart-3" class="vi-icon"></i> Occupancy Analytics Preview</span>
                     </div>
                     <div class="vi-chart" id="viChart"></div>
                     <div class="vi-footer">
                         <span class="vi-metric"><strong>87%</strong> avg. occupancy</span>
-                        <span class="vi-metric vi-up"><i data-lucide="trending-up" class="vi-trend-icon"></i> +12% this
-                            week</span>
+                        <span class="vi-metric vi-up"><i data-lucide="trending-up" class="vi-trend-icon"></i> +12% this week</span>
+                    </div>
+                </div>
+                <!-- Play Button Overlay -->
+                <div style="position: absolute; inset: 0; background: rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; backdrop-filter: blur(2px);">
+                    <div style="width: 72px; height: 72px; background: rgba(255,255,255,0.9); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 30px rgba(0,0,0,0.2); transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+                        <i data-lucide="play" style="width: 32px; height: 32px; color: var(--btn-bg); transform: translateX(2px);"></i>
                     </div>
                 </div>
             </div>
@@ -300,6 +305,18 @@
             </div>
         </div>
     </footer>
+
+    <!-- ══════════ VIDEO MODAL ══════════ -->
+    <div id="videoModal" class="video-modal">
+        <div class="video-modal-backdrop" onclick="closeVideoModal()"></div>
+        <div class="video-modal-content">
+            <button class="video-modal-close" onclick="closeVideoModal()"><i data-lucide="x"></i></button>
+            <video id="demoVideo" controls>
+                <source src="parking (2).mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+    </div>
 
     <script src="script.js"></script>
 </body>

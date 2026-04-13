@@ -23,13 +23,13 @@ window.mapFilters = {
   
     /**
      * Determine graphical rendering bounds visually indicating capacity limits.
+     * IMPROVEMENT 1 — Muted, flat colors: soft green / amber / muted red
      */
     getColorCodeByAvailability: (available, total) => {
-      if (total === 0 || available === 0) return 'red';
+      if (total === 0) return '#e57373';    // muted red
       const ratio = available / total;
-      if (ratio > 0.6) return 'green';
-      if (ratio > 0.1) return 'yellow';
-      return 'red';
+      if (ratio > 0.6) return '#66bb6a';    // soft green
+      if (ratio >= 0.3) return '#ffb74d';   // amber
+      return '#e57373';                      // muted red
     }
   };
-  

@@ -1,14 +1,18 @@
 // ─── Parking Controller ──────────────────────────────────────────────────────
-// Handles fetching parking slot data from Supabase.
+// Handles fetching parking data from Supabase (parking_locations table).
 
 const supabase = require('../config/supabaseClient');
 const { getDistanceKm } = require('../utils/geoUtils');
+const { rankParkingSlots } = require('../services/intelligenceService');
 
-// GET /api/parking — Return all parking slots
+const fs = require('fs');
+const path = require('path');
+
+// GET /api/parking — Return all parking locations
 async function getAllSlots(req, res) {
   try {
     const { data, error } = await supabase
-      .from('parking_slots')
+      .from('parking_locations')
       .select('*')
       .order('id', { ascending: true });
 
@@ -18,19 +22,42 @@ async function getAllSlots(req, res) {
     const slots = data.map(row => ({
       id: row.id,
       name: row.name,
-      lat: row.latitude,
-      lng: row.longitude,
+      lat: row.lat,
+      lng: row.lng,
       status: deriveStatus(row.available_slots, row.total_slots),
       availableSlots: row.available_slots,
       totalSlots: row.total_slots,
       type: row.type,
-      price: row.price,
+      price: row.price_per_hour,
     }));
 
     return res.json(slots);
   } catch (err) {
-    console.error('getAllSlots error:', err.message);
-    return res.status(500).json({ error: 'Failed to fetch parking slots.' });
+    if (!err.message.includes('fetch failed')) {
+      console.error('getAllSlots error:', err.message);
+    }
+    
+    // Offline fallback
+    try {
+        const dataPath = path.join(__dirname, '..', '..', 'data', 'data.json');
+        const rawData = JSON.parse(fs.readFileSync(dataPath, 'utf-8'));
+        
+        const offlineSlots = rawData.map(slot => ({
+          id: slot.id,
+          name: slot.name,
+          lat: slot.lat,
+          lng: slot.lng,
+          status: deriveStatus(slot.availableSlots || slot.available_slots, slot.totalSlots || slot.total_slots),
+          availableSlots: slot.availableSlots || slot.available_slots || 0,
+          totalSlots: slot.totalSlots || slot.total_slots || 0,
+          type: slot.type || 'public',
+          price: slot.price || slot.price_per_hour || 30,
+        }));
+        
+        return res.json(offlineSlots);
+    } catch (fsErr) {
+        return res.status(500).json({ error: 'Failed to fetch parking slots.' });
+    }
   }
 }
 
@@ -45,66 +72,45 @@ async function getNearbySlots(req, res) {
 
     const userLat = parseFloat(lat);
     const userLng = parseFloat(lng);
-    const maxRadius = parseFloat(radius);
     const maxLimit = parseInt(limit, 10);
 
     const { data, error } = await supabase
-      .from('parking_slots')
+      .from('parking_locations')
       .select('*');
 
     if (error) throw error;
 
-    // Filter + sort by distance server-side
-    let nearby = data
-      .map(row => ({
-        id: row.id,
-        name: row.name,
-        lat: row.latitude,
-        lng: row.longitude,
-        status: deriveStatus(row.available_slots, row.total_slots),
-        availableSlots: row.available_slots,
-        totalSlots: row.total_slots,
-        type: row.type,
-        price: row.price,
-        distance: getDistanceKm(userLat, userLng, row.latitude, row.longitude),
-      }))
-      .filter(slot => slot.distance <= maxRadius)
-      .sort((a, b) => a.distance - b.distance)
-      .slice(0, maxLimit);
+    // Map to standard format before scoring
+    const standardFormat = data.map(row => ({
+      id: row.id,
+      name: row.name,
+      lat: row.lat,
+      lng: row.lng,
+      status: deriveStatus(row.available_slots, row.total_slots),
+      availableSlots: row.available_slots,
+      totalSlots: row.total_slots,
+      type: row.type,
+      price: row.price_per_hour,
+    }));
 
-    // Fallback: if nothing within radius, return closest 5
-    if (nearby.length === 0) {
-      nearby = data
-        .map(row => ({
-          id: row.id,
-          name: row.name,
-          lat: row.latitude,
-          lng: row.longitude,
-          status: deriveStatus(row.available_slots, row.total_slots),
-          availableSlots: row.available_slots,
-          totalSlots: row.total_slots,
-          type: row.type,
-          price: row.price,
-          distance: getDistanceKm(userLat, userLng, row.latitude, row.longitude),
-        }))
-        .sort((a, b) => a.distance - b.distance)
-        .slice(0, 5);
-    }
+    // Pass through the Intelligence Service scoring engine
+    const rankedCandidates = await rankParkingSlots(standardFormat, userLat, userLng);
+    const topMatches = rankedCandidates.slice(0, maxLimit);
 
-    return res.json(nearby);
+    return res.json(topMatches);
   } catch (err) {
-    console.error('getNearbySlots error:', err.message);
+      if (!err.message.includes('fetch failed')) console.error('getNearbySlots error:', err.message);
     return res.status(500).json({ error: 'Failed to fetch nearby slots.' });
   }
 }
 
-// GET /api/parking/:id — Return a single parking slot
+// GET /api/parking/:id — Return a single parking location
 async function getSlotById(req, res) {
   try {
     const { id } = req.params;
 
     const { data, error } = await supabase
-      .from('parking_slots')
+      .from('parking_locations')
       .select('*')
       .eq('id', parseInt(id, 10))
       .single();
@@ -116,48 +122,78 @@ async function getSlotById(req, res) {
     const slot = {
       id: data.id,
       name: data.name,
-      lat: data.latitude,
-      lng: data.longitude,
+      lat: data.lat,
+      lng: data.lng,
       status: deriveStatus(data.available_slots, data.total_slots),
       availableSlots: data.available_slots,
       totalSlots: data.total_slots,
       type: data.type,
-      price: data.price,
+      price: data.price_per_hour,
     };
 
     return res.json(slot);
   } catch (err) {
-    console.error('getSlotById error:', err.message);
-    return res.status(500).json({ error: 'Failed to fetch slot.' });
+    if (!err.message.includes('fetch failed')) console.error('getSlotById error:', err.message);
+    
+    // Offline fallback
+    try {
+        const { id } = req.params;
+        const dataPath = path.join(__dirname, '..', '..', 'data', 'data.json');
+        const rawData = JSON.parse(fs.readFileSync(dataPath, 'utf-8'));
+        
+        const slotData = rawData.find(s => s.id === parseInt(id, 10));
+        if (!slotData) return res.status(404).json({ error: 'Slot not found.' });
+
+        const slot = {
+          id: slotData.id,
+          name: slotData.name,
+          lat: slotData.lat,
+          lng: slotData.lng,
+          status: deriveStatus(slotData.availableSlots || slotData.available_slots, slotData.totalSlots || slotData.total_slots),
+          availableSlots: slotData.availableSlots || slotData.available_slots || 0,
+          totalSlots: slotData.totalSlots || slotData.total_slots || 0,
+          type: slotData.type || 'public',
+          price: slotData.price || slotData.price_per_hour || 30,
+        };
+        
+        return res.json(slot);
+    } catch (fsErr) {
+        return res.status(500).json({ error: 'Failed to fetch slot.' });
+    }
   }
 }
 
-// POST /api/parking — Create a new parking slot
+// POST /api/parking — Create a new parking location
 async function createSlot(req, res) {
   try {
-    const { name, latitude, longitude, total_slots, price, type } = req.body;
+    const { name, lat, lng, total_slots, price_per_hour, type } = req.body;
 
-    if (!name || !latitude || !longitude || total_slots === undefined) {
+    if (!name || !lat || !lng || total_slots === undefined) {
       return res.status(400).json({ error: 'Missing required parking slot fields.' });
     }
 
-    // Auto-generate ID or let Supabase handle if it's serial. Assume we need to find max ID since it's `INT`
-    const { data: maxData } = await supabase.from('parking_slots').select('id').order('id', { ascending: false }).limit(1);
+    const { data: maxData } = await supabase
+      .from('parking_locations')
+      .select('id')
+      .order('id', { ascending: false })
+      .limit(1);
+    
     const newId = (maxData && maxData.length > 0) ? maxData[0].id + 1 : 1;
 
     const newSlot = {
       id: newId,
       name,
-      latitude: parseFloat(latitude),
-      longitude: parseFloat(longitude),
+      lat: parseFloat(lat),
+      lng: parseFloat(lng),
       total_slots: parseInt(total_slots, 10),
-      available_slots: parseInt(total_slots, 10), // Initially all available
-      price: price ? parseFloat(price) : 30.00,
-      type: type || 'public'
+      available_slots: parseInt(total_slots, 10),
+      price_per_hour: price_per_hour ? parseFloat(price_per_hour) : 30.00,
+      type: type || 'public',
+      vehicle_type: 'car'
     };
 
     const { data, error } = await supabase
-      .from('parking_slots')
+      .from('parking_locations')
       .insert(newSlot)
       .select()
       .single();
@@ -177,11 +213,11 @@ function deriveStatus(available, total) {
   return 'available';
 }
 
-// ─── Massive Scale Extensions ──────────────────────────────────────────────────
+// ─── Live Simulation & Crowdsource ─────────────────────────────────────────
 
 let simulationTimer = null;
 
-// POST /api/parking/simulate — Toggles a living background loop mapping variable capacity
+// POST /api/parking/simulate — Toggles a living demand simulation
 async function simulateDemand(req, res) {
   if (simulationTimer) {
     clearInterval(simulationTimer);
@@ -189,24 +225,26 @@ async function simulateDemand(req, res) {
     return res.status(200).json({ message: "Traffic simulation halted.", active: false });
   }
 
-  // Engage Living Traffic Algorithm every 15 seconds
   simulationTimer = setInterval(async () => {
     try {
-      const { data, error } = await supabase.from('parking_slots').select('id, available_slots, total_slots').limit(15);
+      const { data, error } = await supabase
+        .from('parking_locations')
+        .select('id, available_slots, total_slots')
+        .limit(15);
       if (error || !data) return;
 
       for (const slot of data) {
-        // Randomly modify availability simulating people leaving/arriving
-        const delta = Math.floor(Math.random() * 5) - 2; // -2 to +2
+        const delta = Math.floor(Math.random() * 5) - 2;
         let newAvail = slot.available_slots + delta;
-        
         if (newAvail < 0) newAvail = 0;
         if (newAvail > slot.total_slots) newAvail = slot.total_slots;
         
-        await supabase.from('parking_slots').update({ available_slots: newAvail }).eq('id', slot.id);
+        await supabase.from('parking_locations').update({ available_slots: newAvail }).eq('id', slot.id);
       }
     } catch (e) {
-      console.error("Simulation Tick Error", e);
+      if (!e.message.includes('fetch failed')) {
+        console.error("Simulation Tick Error", e.message || e);
+      }
     }
   }, 15000);
 
@@ -219,7 +257,11 @@ async function reportSlot(req, res) {
   if (!id || !status) return res.status(400).json({ error: "Missing slot ID or status" });
 
   try {
-    const { data: slot, error: fetchErr } = await supabase.from('parking_slots').select('available_slots, total_slots').eq('id', id).single();
+    const { data: slot, error: fetchErr } = await supabase
+      .from('parking_locations')
+      .select('available_slots, total_slots')
+      .eq('id', id)
+      .single();
     if (fetchErr) throw fetchErr;
 
     let newAvail = slot.available_slots;
@@ -228,7 +270,10 @@ async function reportSlot(req, res) {
       newAvail = Math.min(slot.available_slots + 3, slot.total_slots);
     }
 
-    const { error: upErr } = await supabase.from('parking_slots').update({ available_slots: newAvail }).eq('id', id);
+    const { error: upErr } = await supabase
+      .from('parking_locations')
+      .update({ available_slots: newAvail })
+      .eq('id', id);
     if (upErr) throw upErr;
 
     return res.status(200).json({ success: true, message: `Slot ${id} updated to ${newAvail}` });
