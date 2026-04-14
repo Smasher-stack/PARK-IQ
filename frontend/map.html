@@ -47,6 +47,57 @@
     <!-- Map Controls & Overlays -->
     <div class="map-ui-layer">
         
+        <!-- TOP: Active Booking Session Panel (Hidden by default) -->
+        <div id="activeSessionPanel" class="active-session-panel" style="display: none;">
+            <div class="session-header">
+                <div class="session-status-pill">
+                    <span class="pulse-dot"></span> En Route
+                </div>
+                <h2 id="sessionParkingName" class="session-parking-name">Loading...</h2>
+            </div>
+            <div class="session-metrics">
+                <div class="session-metric">
+                    <div id="sessionEta" class="metric-val" style="color: #3b82f6;">-- min</div>
+                    <div class="metric-label">ETA</div>
+                </div>
+                <div class="session-metric-divider"></div>
+                <div class="session-metric">
+                    <div id="sessionDist" class="metric-val">-- km</div>
+                    <div class="metric-label">Distance</div>
+                </div>
+                <div class="session-metric-divider"></div>
+                <div class="session-metric">
+                    <div id="sessionPrice" class="metric-val">₹--</div>
+                    <div class="metric-label">Pre-paid</div>
+                </div>
+            </div>
+            <div class="session-actions">
+                <button id="btnCancelSession" class="btn-session btn-session-outline">Cancel</button>
+                <button id="btnRecenterRoute" class="btn-session btn-session-icon" title="Re-center"><i data-lucide="crosshair"></i></button>
+                <button id="btnShowQR" class="btn-session btn-session-primary"><i data-lucide="qr-code"></i> Show Pass</button>
+                <!-- This Arrival button replaces 'Show Pass' when close enough -->
+                <button id="btnArrivedQR" class="btn-session btn-session-success" style="display: none;"><i data-lucide="check-circle"></i> You've Arrived</button>
+            </div>
+        </div>
+
+        <!-- QR Modal Overlay -->
+        <div id="qrModalOverlay" class="qr-modal-overlay" style="display: none;">
+            <div class="qr-modal">
+                <div class="qr-modal-header">
+                    <h3>Entry Pass</h3>
+                    <button id="btnCloseQR" class="qr-close-btn"><i data-lucide="x"></i></button>
+                </div>
+                <div class="qr-modal-body">
+                    <p class="qr-modal-subtitle">Scan at the boom barrier to enter</p>
+                    <div class="qr-image-wrapper">
+                        <img id="modalQrImage" src="" alt="Entry QR">
+                    </div>
+                    <div id="modalSlotName" class="qr-slot-name">Unknown Spot</div>
+                    <div id="modalValidTill" class="qr-valid-till">Valid until --:--</div>
+                </div>
+            </div>
+        </div>
+
         <!-- TOP-LEFT: Floating Find Parking Panel — IMPROVEMENT 2 -->
         <div class="floating-panel-container top-left">
             <button id="toggleFindPanel" class="btn-icon" title="Find Parking">
@@ -75,12 +126,21 @@
                                 <input type="text" class="location-input" id="searchOrigin" placeholder="From (Your location)">
                             </div>
                             <div class="input-group">
-                                <input type="text" class="location-input" id="searchDestination" placeholder="To (Where to park?)">
+                                <input type="text" class="location-input" id="searchDestination" placeholder="Where are you going?">
                             </div>
                         </div>
                     </div>
             
                     <div class="booking-options">
+                        <div class="option-btn" style="flex:1; padding:0; position:relative;">
+                            <i data-lucide="car" class="icon-sm" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); pointer-events:none;"></i>
+                            <select id="vehicleType" class="option-select" style="width:100%; height:100%; appearance:none; background:transparent; border:none; padding:10px 14px 10px 34px; font-weight:700; font-size:0.85rem; font-family:inherit; cursor:pointer;">
+                                <option value="car">Car / SUV</option>
+                                <option value="bike">Two Wheeler (Bike)</option>
+                                <option value="large">SUV / Large Van</option>
+                            </select>
+                            <i data-lucide="chevron-down" class="chevron" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); pointer-events:none; width:14px; height:14px;"></i>
+                        </div>
                         <div class="option-btn" style="flex:1; padding:0; position:relative;">
                             <i data-lucide="clock" class="icon-sm" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); pointer-events:none;"></i>
                             <select id="timePref" class="option-select" style="width:100%; height:100%; appearance:none; background:transparent; border:none; padding:10px 14px 10px 34px; font-weight:700; font-size:0.85rem; font-family:inherit; cursor:pointer;">
@@ -91,7 +151,10 @@
                             </select>
                             <i data-lucide="chevron-down" class="chevron" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); pointer-events:none; width:14px; height:14px;"></i>
                         </div>
-                        <div class="option-btn" style="flex:2; padding:0; position:relative;">
+                    </div>
+                    
+                    <div class="booking-options" style="margin-top: 10px;">
+                        <div class="option-btn" style="flex:1; padding:0; position:relative;">
                             <i data-lucide="sparkles" class="icon-sm" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); pointer-events:none; color: #a855f7;"></i>
                             <select id="smartPreference" class="option-select" style="width:100%; height:100%; appearance:none; background:transparent; border:none; padding:10px 14px 10px 34px; font-weight:800; font-size:0.85rem; font-family:inherit; cursor:pointer; color: #a855f7;">
                                 <option value="smart">Smart Assistant (Default)</option>
@@ -136,8 +199,11 @@
             </button>
         </div>
 
-        <!-- BOTTOM-RIGHT: Heatmap Toggle + Filters -->
+        <!-- BOTTOM-RIGHT: Heatmap Toggle + Filters + Smart Assistant FAB -->
         <div class="map-controls bottom-right">
+            <button id="smartAssistantFab" class="smart-fab" onclick="window.triggerSmartAssistant()" title="Smart Assistant — Find best parking instantly">
+                <i data-lucide="sparkles" style="width:20px; height:20px;"></i>
+            </button>
             <button id="toggleHeatmap" class="pill-btn" title="Toggle Heatmap">
                 <i data-lucide="flame" style="width: 15px; color: #f97316;"></i> Heatmap
             </button>

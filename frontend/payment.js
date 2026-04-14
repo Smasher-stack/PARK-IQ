@@ -119,11 +119,11 @@
         sessionStorage.setItem('pendingSlotLng', data.slot.lng);
         sessionStorage.setItem('pendingValidTill', data.booking.valid_till);
   
-        showToast("Payment Successful", "Redirecting to your entry pass...", "success");
+        showToast("Payment Successful", "Redirecting to active navigation...", "success");
         
         // Slight delay to read the toast
         setTimeout(() => {
-          window.location.href = 'qr.html';
+          window.location.href = 'map.html?session=active';
         }, 1200);
   
       } catch (err) {

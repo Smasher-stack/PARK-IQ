@@ -165,13 +165,27 @@ async function rankParkingSlots(slots, userLat, userLng, options = {}) {
     const demandRatio = Math.min(1, (totalSlots - availableSlots) / totalSlots);
     const demandScore = normalize(demandRatio, minDemand, maxDemand) * weights.demand;
 
-    // F. Context-Aware Logic (Reward/Penalty)
+    // F. Vehicle-Type Intelligence (Requirement 4)
+    let vehicleScore = 0;
+    const selectedVehicle = (options.vehicle || 'car').toLowerCase();
+    
+    // Logic: 
+    // - Bikes prefer cheaper, smaller lots (residential/on-street).
+    // - Large/SUVs prefer commercial/public lots with high capacity.
+    if (selectedVehicle === 'bike') {
+      if (type === 'residential') vehicleScore -= 0.1; // Reward residential for bikes
+      if (Number(slot.price) < 20) vehicleScore -= 0.05; // Reward cheaper for bikes
+    } else if (selectedVehicle === 'large') {
+      if (totalSlots > 100) vehicleScore -= 0.1; // Reward high capacity for SUVs
+      if (type === 'public') vehicleScore -= 0.05; // Public lots usually have better SUV ramps
+    }
+
+    // G. Context-Aware Logic (Reward/Penalty)
     let contextModifier = 0;
-    const type = slot.type ? slot.type.toLowerCase() : 'public';
     // Morning (6am - 11am): prioritize commercial/office
     if (currentHour >= 6 && currentHour < 11) {
       if (type === 'commercial' || type === 'office') contextModifier -= 0.05;
-      if (type === 'residential') contextModifier += 0.05; // Slightly penalize
+      if (type === 'residential') contextModifier += 0.05; 
     }
     // Evening (17pm - 23pm): prioritize residential
     else if (currentHour >= 17 && currentHour <= 23) {
@@ -180,7 +194,7 @@ async function rankParkingSlots(slots, userLat, userLng, options = {}) {
     }
 
     // We want the LOWEST score possible
-    const totalScore = timeScore + distScore + priceScore + availableScore + demandScore + contextModifier;
+    const totalScore = timeScore + distScore + priceScore + availableScore + demandScore + vehicleScore + contextModifier;
 
     return {
       ...slot,
@@ -200,16 +214,31 @@ async function rankParkingSlots(slots, userLat, userLng, options = {}) {
     if (safeCandidates.length > 0) {
       safeCandidates[0].isBestMatch = true;
       
-      let badgeLabel = "Best Match";
-      if (preference === 'fastest') badgeLabel = "Fastest";
-      else if (preference === 'cheapest') badgeLabel = "Cheapest";
-      else if (preference === 'closest') badgeLabel = "Closest";
+      let badgeLabel = "Best Option (Smart)";
+      let reason = "Optimal balance of time, price, and availability";
+      
+      const vehicle = (options.vehicle || 'car').toLowerCase();
+      const vehicleText = (vehicle === 'bike') ? "Bike-friendly" : (vehicle === 'large' ? "SUV-friendly" : "Car-friendly");
+
+      if (preference === 'fastest') {
+         badgeLabel = `Best Option (${vehicleText})`;
+         reason = "Quickest route considering vehicle type & traffic";
+      } else if (preference === 'cheapest') {
+         badgeLabel = `Best Option (${vehicleText})`;
+         reason = "Lowest price per hour for your vehicle";
+      } else if (preference === 'closest') {
+         badgeLabel = `Best Option (${vehicleText})`;
+         reason = "Shortest walking distance for your vehicle";
+      } else {
+         badgeLabel = `Best Option (${vehicleText})`;
+         reason = "Best match for your vehicle & location";
+      }
       
       safeCandidates[0].label = badgeLabel;
+      safeCandidates[0].reason = reason;
 
       // Assign label 2
       if (safeCandidates.length > 1) {
-          // If we looking for cheapest, 2nd might also be cheap
           safeCandidates[1].label = "Good Alternative";
       }
     }

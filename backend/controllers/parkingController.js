@@ -61,10 +61,10 @@ async function getAllSlots(req, res) {
   }
 }
 
-// GET /api/parking/nearby?lat=X&lng=Y&radius=3&preference=fastest
+// GET /api/parking/nearby?lat=X&lng=Y&radius=3&preference=fastest&vehicle=bike
 async function getNearbySlots(req, res) {
   try {
-    const { lat, lng, radius = 3, limit = 10, preference = 'smart' } = req.query;
+    const { lat, lng, radius = 3, limit = 10, preference = 'smart', vehicle = 'car' } = req.query;
 
     if (!lat || !lng) {
       return res.status(400).json({ error: 'lat and lng query params are required.' });
@@ -80,21 +80,36 @@ async function getNearbySlots(req, res) {
 
     if (error) throw error;
 
-    // Map to standard format before scoring
-    const standardFormat = data.map(row => ({
-      id: row.id,
-      name: row.name,
-      lat: row.lat,
-      lng: row.lng,
-      status: deriveStatus(row.available_slots, row.total_slots),
-      availableSlots: row.available_slots,
-      totalSlots: row.total_slots,
-      type: row.type,
-      price: row.price_per_hour,
-    }));
+    // Map to standard format + Enrich with heuristic vehicle support (Requirement 2)
+    const enrichedData = data.map(row => {
+      // Logic: Public parking supports all. Residential usually supports only 1.
+      let supported = ['car', 'bike', 'large']; 
+      if (row.type === 'residential') {
+        const hash = row.id % 2; 
+        supported = hash === 0 ? ['car', 'bike'] : ['bike', 'large'];
+      }
+      
+      return {
+        id: row.id,
+        name: row.name,
+        lat: row.lat,
+        lng: row.lng,
+        status: deriveStatus(row.available_slots, row.total_slots),
+        availableSlots: row.available_slots,
+        totalSlots: row.total_slots,
+        type: row.type,
+        price: row.price_per_hour,
+        supportedVehicles: supported
+      };
+    });
+
+    // Filter by vehicle compatibility (Requirement 3)
+    const filteredByVehicle = enrichedData.filter(slot => 
+      slot.supportedVehicles.includes(vehicle.toLowerCase())
+    );
 
     // Pass through the Intelligence Service scoring engine
-    const rankedCandidates = await rankParkingSlots(standardFormat, userLat, userLng, { preference });
+    const rankedCandidates = await rankParkingSlots(filteredByVehicle, userLat, userLng, { preference, vehicle });
     const topMatches = rankedCandidates.slice(0, maxLimit);
 
     return res.json(topMatches);

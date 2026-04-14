@@ -27,25 +27,8 @@
   // Satellite state — toggled via our custom button
   let isSatelliteActive = false;
 
-  // ════════ MARKER CLUSTER — Clean, No Count Bubbles ════════
-  const markerCluster = L.markerClusterGroup({
-    iconCreateFunction: function(cluster) {
-      const count = cluster.getChildCount();
-      let size = 24;
-      if (count > 20) size = 30;
-      else if (count > 10) size = 27;
-      return L.divIcon({
-        html: `<div class="cluster-dot"></div>`,
-        className: 'marker-cluster-minimal',
-        iconSize: L.point(size, size)
-      });
-    },
-    maxClusterRadius: 40,
-    spiderfyOnMaxZoom: true,
-    showCoverageOnHover: false,
-    zoomToBoundsOnClick: true,
-    animateAddingMarkers: true
-  });
+  // ════════ MARKER CLUSTER — Disabled for Clarity (Requirement 7) ════════
+  const markerCluster = L.featureGroup();
   map.addLayer(markerCluster);
 
   // Default user location (Chromepet Railway Station area)
@@ -85,8 +68,15 @@
   let globalRoutingControl = null;
   let allParkingData = [];
   let userMarkerObj = null;
+  let lastBestSlot = null; // Track for Smart Assistant re-trigger
+  let lastNearbyData = []; // Cache for filter recalculation
   const notifiedZones = new Set();
   window.slotLayers = {};
+
+  // ════════ ACTIVE SESSION STATE ════════
+  let isActiveSession = false;
+  let currentSessionData = null;
+  let arrivalTriggered = false;
 
   // ════════ CUSTOM ROUTE RENDERING — Google Maps Level UX ════════
   let activeRouteLayer = null;
@@ -174,12 +164,19 @@
     routeAnimationFrame = requestAnimationFrame(drawNextSegment);
   }
 
-  window.startNavigation = async (destLat, destLng) => {
+  window.startNavigation = async (destLat, destLng, forceStartLat = null, forceStartLng = null) => {
     // 1. Clear any previous route
     clearRouteDisplay();
     if (globalRoutingControl) { map.removeControl(globalRoutingControl); globalRoutingControl = null; }
 
-    const origin = userMarkerObj ? userMarkerObj.getLatLng() : { lat: userLat, lng: userLng };
+    let originLat = forceStartLat;
+    let originLng = forceStartLng;
+    if (!originLat || !originLng) {
+        const originObj = userMarkerObj ? userMarkerObj.getLatLng() : { lat: userLat, lng: userLng };
+        originLat = originObj.lat;
+        originLng = originObj.lng;
+    }
+    const origin = { lat: originLat, lng: originLng };
     map.closePopup();
 
     // 2. Show loading state
@@ -217,9 +214,6 @@
       const endPos = data.snappedEnd || { lat: destLat, lng: destLng };
       routeStartMarker = L.marker([startPos.lat, startPos.lng], { icon: startMarkerIcon, zIndexOffset: 2000 }).addTo(map);
       routeEndMarker = L.marker([endPos.lat, endPos.lng], { icon: endMarkerIcon, zIndexOffset: 2000 }).addTo(map);
-      
-      // Bind Best Route Label to end marker and open it
-      routeEndMarker.bindTooltip('<div class="best-route-label">Best Route ⭐</div>', { permanent: true, direction: 'top', className: 'transparent-tooltip', offset: [0, -20] }).openTooltip();
 
       // 6. Fit map bounds to route with padding
       const routeBounds = L.latLngBounds(coords);
@@ -227,8 +221,16 @@
 
       // 7. Animate the route drawing
       animateRouteDrawing(coords, () => {
-        // Animation complete — show info panel
-        showRouteInfoBar(data.distance, data.duration);
+        // Bind Best Route Label to the polyline path at its center
+        if (activeRouteLayer) {
+           const midPoint = coords[Math.floor(coords.length / 2)];
+           L.tooltip({ permanent: true, direction: 'center', className: 'best-route-tooltip' })
+            .setLatLng(midPoint)
+            .setContent('<div class="best-route-label">🚀 Best Route</div>')
+            .addTo(map);
+        }
+        
+        // Removed showRouteInfoBar call to keep UI clean and use Decision Card
       });
 
     } catch (err) {
@@ -237,34 +239,28 @@
     }
   };
 
-  // Show route info bar at bottom
+  // Helper: Removed showRouteInfoBar completely (Requirement 1)
   function showRouteInfoBar(distKm, timeMins) {
-    const barHtml = `
-      <div class="route-info-bar">
-        <div class="route-stat">
-          <div class="route-stat-value">${distKm} km</div>
-          <div class="route-stat-label">Distance</div>
-        </div>
-        <div class="route-divider"></div>
-        <div class="route-stat">
-          <div class="route-stat-value">${timeMins} min</div>
-          <div class="route-stat-label">Travel Time</div>
-        </div>
-        <button class="route-close-btn" onclick="window.clearRoute()" title="Close route">
-          <i data-lucide="x"></i>
-        </button>
-      </div>
-    `;
-    document.getElementById('routeInfoBar').innerHTML = barHtml;
-    lucide.createIcons();
+    // Intentionally left blank - all metadata exists in Decision Card or Active Session Panel.
+    if (isActiveSession) {
+      document.getElementById('sessionEta').innerText = `${timeMins} min`;
+      document.getElementById('sessionDist').innerText = `${distKm} km`;
+    }
   }
 
-  // Clear route
+  // Clear route — re-show decision card if available
   window.clearRoute = () => {
     clearRouteDisplay();
+    // Also remove tooltips matching best-route-tooltip class
+    document.querySelectorAll('.leaflet-tooltip.best-route-tooltip').forEach(el => el.remove());
+
     if (globalRoutingControl) {
       map.removeControl(globalRoutingControl);
       globalRoutingControl = null;
+    }
+    // Re-show decision card
+    if (lastBestSlot) {
+      showDecisionCard(lastBestSlot);
     }
   };
 
@@ -313,24 +309,27 @@
 
     // IMPROVEMENT 1 — Flat dot markers with subtle borders
     let customHtml, iconSize, iconAnchor;
+    let opacityValue = 1;
 
+    // Requirement 5 & 6: Reduce marker sizing + Fade non-selected
     if (isSpecialMatch) {
-      // IMPROVEMENT 3 — Slightly larger with subtle highlight
+      opacityValue = 1; 
+      // Marker slightly scaled down compared to previous iteration for clutter reduction
       customHtml = `
-        <div class="recommended-marker">
-          <div class="parking-dot" style="width:26px; height:26px; background-color:${color};"></div>
-          <div class="rec-ring"></div>
-          <div class="rec-badge">
-            <svg width="8" height="8" viewBox="0 0 24 24" fill="white" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        <div class="recommended-marker" style="z-index: 1000 !important; position: relative;">
+          <div class="parking-dot" style="width:30px; height:30px; background-color:${color}; display:flex; align-items:center; justify-content:center; box-shadow: 0 0 16px 4px ${color};">
+            <span style="font-size: 15px; line-height: 1; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">⭐</span>
           </div>
+          <div class="rec-ring" style="width: 44px; height: 44px; border-color: ${color}; top: -7px; left: -7px;"></div>
         </div>
       `;
-      iconSize = [42, 42];
-      iconAnchor = [21, 21];
+      iconSize = [44, 44];
+      iconAnchor = [22, 22];
     } else {
-      customHtml = `<div class="parking-dot" style="width:20px; height:20px; background-color:${color};"></div>`;
-      iconSize = [24, 24];
-      iconAnchor = [12, 12];
+      opacityValue = 0.5; // Always fade non-best matches to reduce clutter
+      customHtml = `<div class="parking-dot" style="width:16px; height:16px; background-color:${color}; opacity:${opacityValue}; border-width: 1px;"></div>`;
+      iconSize = [18, 18];
+      iconAnchor = [9, 9];
     }
 
     const icon = L.divIcon({
@@ -340,20 +339,18 @@
       iconAnchor: L.point(iconAnchor[0], iconAnchor[1])
     });
 
-    const marker = L.marker([lat, lng], { icon });
-    markerCluster.addLayer(marker);
+    // Jitter coordination for overlapping markers (Requirement 4)
+    // Add a tiny random offset if markers share exact lat/lng
+    const jitter = 0.00005; 
+    const finalLat = lat + (Math.random() - 0.5) * jitter;
+    const finalLng = lng + (Math.random() - 0.5) * jitter;
 
-    // 150m geofence radius
-    const geofence = L.circle([lat, lng], {
-      color: 'rgba(59,130,246,0.15)',
-      fillColor: 'rgba(59,130,246,0.05)',
-      fillOpacity: 0.05,
-      weight: 1,
-      radius: 150
-    }).addTo(map);
-    allMarkers.push(geofence);
-    
-    window.slotLayers[id] = { marker, circle: geofence };
+    const marker = L.marker([finalLat, finalLng], { icon, zIndexOffset: isSpecialMatch ? 1000 : 0 });
+    markerCluster.addLayer(marker);
+    allMarkers.push(marker); // Ensure it's tracked for cleanup (Requirement 1 & 2)
+
+    // Geofence circles removed for visual clarity (Requirement 7)
+    window.slotLayers[id] = { marker };
 
     const isFull = status === "booked";
     let displayStatus = "Available";
@@ -451,6 +448,102 @@
     });
   };
 
+  // ════════ DECISION CARD — Floating Best Parking Recommendation ════════
+  const showDecisionCard = (bestSlot) => {
+    lastBestSlot = bestSlot;
+    let card = document.getElementById('decisionCard');
+    if (!card) {
+      card = document.createElement('div');
+      card.id = 'decisionCard';
+      document.querySelector('.map-ui-layer').appendChild(card);
+    }
+
+    const available = bestSlot.availableSlots || bestSlot.available_slots || 0;
+    const totalSlots = bestSlot.totalSlots || bestSlot.total_slots || 1;
+    const priceVal = bestSlot.price || 30;
+    const eta = bestSlot.etaText || 'N/A';
+    const labelText = bestSlot.label || 'Best Option (Smart)';
+    const reasonText = bestSlot.reason || 'Recommended based on traffic and availability';
+    const color = getMarkerColor(available, totalSlots);
+
+    card.className = 'decision-card glass-panel';
+    card.innerHTML = `
+      <div class="dc-header">
+        <div class="dc-badge">⭐ ${labelText}</div>
+        <button class="dc-close" onclick="document.getElementById('decisionCard').classList.add('dc-hidden')" title="Dismiss">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="dc-name-wrap" style="padding: 10px 18px 0;">
+        <div class="dc-name" style="padding:0; margin-bottom: 2px;">${bestSlot.name}</div>
+        <div class="dc-reason" style="font-size: 0.72rem; color: #52525b; font-weight: 600; display:flex; align-items:center; gap: 4px;">
+           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+           ${reasonText}
+        </div>
+      </div>
+      <div class="dc-stats" style="padding: 12px 18px;">
+        <div class="dc-stat">
+          <div class="dc-stat-value" style="color:#3b82f6;">${eta}</div>
+          <div class="dc-stat-label">ETA</div>
+        </div>
+        <div class="dc-stat-divider"></div>
+        <div class="dc-stat">
+          <div class="dc-stat-value">₹${priceVal}<span style="font-size:0.7rem;color:#a1a1aa;">/hr</span></div>
+          <div class="dc-stat-label">Price</div>
+        </div>
+        <div class="dc-stat-divider"></div>
+        <div class="dc-stat">
+          <div class="dc-stat-value" style="display:flex;align-items:center;gap:4px;">
+            <span style="width:8px;height:8px;border-radius:50%;background:${color};display:inline-block;"></span>
+            ${available}<span style="font-size:0.7rem;color:#a1a1aa;">/${totalSlots}</span>
+          </div>
+          <div class="dc-stat-label">Slots</div>
+        </div>
+      </div>
+      
+      <!-- CONFIDENCE INDICATOR -->
+      <div class="dc-confidence" style="text-align:center; padding: 0 18px 10px; font-size: 0.65rem; color: #71717a; font-weight: 700; letter-spacing: 0.02em;">
+         <i data-lucide="shield-check" style="width:10px; height:10px; vertical-align:text-bottom; color:#22c55e;"></i> Recommended based on live traffic & availability
+      </div>
+
+      <!-- DOMINANT CTA -->
+      <div class="dc-actions" style="padding: 0 18px 16px; display:flex; gap: 8px;">
+        <button class="dc-btn dc-btn-nav" id="dcNavigateBtn" style="flex:0.25; background:#f4f4f5; color:#1a1a1a;" title="Navigate Area">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+        </button>
+        <button class="dc-btn dc-btn-reserve" id="dcReserveBtn" style="flex:1; background: linear-gradient(135deg, #1a1a1a, #000); color: #fff; font-size: 0.95rem; justify-content: center; transform: none;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2z"/><path d="m9 12 2 2 4-4"/></svg>
+          Reserve Spot
+        </button>
+      </div>
+    `;
+
+    card.classList.remove('dc-hidden');
+    
+    // Slight rendering delay for lucide
+    setTimeout(() => lucide.createIcons({root: card}), 10);
+
+    // Wire navigate button
+    document.getElementById('dcNavigateBtn').onclick = (e) => {
+      e.stopPropagation();
+      const uPos = userMarkerObj ? userMarkerObj.getLatLng() : { lat: userLat, lng: userLng };
+      map.flyTo([bestSlot.lat, bestSlot.lng], 16, { animate: true, duration: 1.0 });
+      window.startNavigation(bestSlot.lat, bestSlot.lng, uPos.lat, uPos.lng);
+      openSidePanelDetail(bestSlot.id, bestSlot.name, bestSlot.lat, bestSlot.lng, totalSlots, available, priceVal);
+    };
+
+    // Wire reserve button
+    document.getElementById('dcReserveBtn').onclick = (e) => {
+      e.stopPropagation();
+      window.bookSlot(bestSlot.id);
+    };
+  };
+
+  const hideDecisionCard = () => {
+    const card = document.getElementById('decisionCard');
+    if (card) card.classList.add('dc-hidden');
+  };
+
   // ════════ RE-RENDER MAP ════════
   const reRenderMap = async (lat, lon, isLive = false) => {
     markerCluster.clearLayers();
@@ -459,10 +552,12 @@
     if (userMarkerObj) map.removeLayer(userMarkerObj);
 
     const prefSelect = document.getElementById('smartPreference');
-    const preference = prefSelect ? prefSelect.value : 'smart';
+    const vehicleSelect = document.getElementById('vehicleType');
+    const preference = prefSelect.value;
+    const vehicle = vehicleSelect ? vehicleSelect.value : 'car';
 
     try {
-      const response = await fetch(`/api/parking/nearby?lat=${lat}&lng=${lon}&preference=${preference}&limit=50`);
+      const response = await fetch(`/api/parking/nearby?lat=${lat}&lng=${lon}&preference=${preference}&vehicle=${vehicle}&limit=50`);
       let nearby = await response.json();
 
       if (!Array.isArray(nearby)) {
@@ -486,7 +581,8 @@
           etaText: slot.etaText,
           isRecommended: slot.isBestMatch,
           isBestMatch: slot.isBestMatch,
-          label: slot.label
+          label: slot.label,
+          reason: slot.reason
         });
       });
 
@@ -520,11 +616,25 @@
       // User marker
       userMarkerObj = L.marker([lat, lon], { icon: userIcon, zIndexOffset: 1000 }).addTo(map);
       
+      // Cache for filter recalculation
+      lastNearbyData = nearby;
+
+      // Show Decision Card for the Best Match
+      const bestSlot = nearby.find(s => s.isBestMatch);
+      if (bestSlot) {
+        showDecisionCard(bestSlot);
+      } else {
+        hideDecisionCard();
+      }
+
       // IMPROVEMENT 9 — Smooth fly animation
       map.flyTo([lat, lon], 14, { animate: true, duration: 1.2 });
       setTimeout(() => lucide.createIcons(), 50);
+
+      return nearby;
     } catch(err) {
         console.error("Failed to fetch smart nearby parking", err);
+        return [];
     }
   };
 
@@ -632,6 +742,27 @@
             document.getElementById('searchOrigin').value = "Live GPS Active";
             reRenderMap(uLat, uLng, true); 
 
+            // Arrival logic for Active Session (Requirement 5)
+            if (isActiveSession && !arrivalTriggered && currentSessionData) {
+              const distToTarget = window.geofenceUtils.calculateDistance(uLat, uLng, currentSessionData.lat, currentSessionData.lng);
+              if (distToTarget <= 0.050) { // 50 meters
+                arrivalTriggered = true;
+                const statusPill = document.querySelector('.session-status-pill');
+                if (statusPill) {
+                  statusPill.innerHTML = '<span class="pulse-dot"></span> Arrived';
+                  statusPill.style.color = '#10b981';
+                  statusPill.style.background = 'rgba(16, 185, 129, 0.1)';
+                }
+                
+                // Toggle buttons
+                document.getElementById('btnShowQR').style.display = 'none';
+                document.getElementById('btnArrivedQR').style.display = 'flex';
+                
+                // Auto-show QR on arrival for convenience
+                openQrModal();
+              }
+            }
+
             // Geofence checking
             const sortedZones = window.geofenceUtils.sortZonesByDistance(allParkingData, uLat, uLng);
             
@@ -646,16 +777,12 @@
                 triggerSmartParkingAlert(slot, distanceKm);
                 
                 if (window.slotLayers[slot.id]) {
-                  window.geofenceUtils.updateZoneStyle(window.slotLayers[slot.id].circle, true);
                   map.flyTo([slot.lat, slot.lng], 17, { animate: true, duration: 1.0 });
                   window.slotLayers[slot.id].marker.openPopup();
                 }
 
               } else if (distanceKm > 0.165 && notifiedZones.has(slot.id)) {
                 notifiedZones.delete(slot.id);
-                if (window.slotLayers[slot.id]) {
-                  window.geofenceUtils.updateZoneStyle(window.slotLayers[slot.id].circle, false);
-                }
               }
             });
           },
@@ -726,7 +853,20 @@
             const lat = parseFloat(loc.lat);
             const lon = parseFloat(loc.lon);
             if (searchMarker) map.removeLayer(searchMarker);
-            reRenderMap(lat, lon, false);
+            
+            reRenderMap(lat, lon, false).then(nearby => {
+               // Auto Route to Best Parking (Requirement 3)
+               if (nearby && nearby.length > 0) {
+                  const best = nearby.find(s => s.isBestMatch);
+                  if (best) {
+                     // Wait for fly animation, then draw route from USER to BEST
+                     setTimeout(() => {
+                        const uPos = userMarkerObj ? userMarkerObj.getLatLng() : { lat, lng: lon };
+                        window.startNavigation(best.lat, best.lng, uPos.lat, uPos.lng);
+                     }, 1500);
+                  }
+               }
+            });
 
             // Collapse panel after successful search — IMPROVEMENT 2
             if (findPanel) {
@@ -794,6 +934,27 @@
   const prefSelect = document.getElementById('smartPreference');
   if (prefSelect) {
       prefSelect.addEventListener('change', () => {
+          clearRouteDisplay(); // Clear old route on preference change
+          const uLat = userMarkerObj ? userMarkerObj.getLatLng().lat : userLat;
+          const uLng = userMarkerObj ? userMarkerObj.getLatLng().lng : userLng;
+          reRenderMap(uLat, uLng, false).then(nearby => {
+            // Auto-route to new best after preference change
+            if (nearby && nearby.length > 0) {
+              const best = nearby.find(s => s.isBestMatch);
+              if (best) {
+                setTimeout(() => {
+                  window.startNavigation(best.lat, best.lng, uLat, uLng);
+                }, 1200);
+              }
+            }
+          });
+      });
+  }
+
+  const vehicleSelect = document.getElementById('vehicleType');
+  if (vehicleSelect) {
+      vehicleSelect.addEventListener('change', () => {
+          clearRouteDisplay();
           const uLat = userMarkerObj ? userMarkerObj.getLatLng().lat : userLat;
           const uLng = userMarkerObj ? userMarkerObj.getLatLng().lng : userLng;
           reRenderMap(uLat, uLng, false);
@@ -922,6 +1083,159 @@
       setTimeout(() => {
         window.startNavigation(navLat, navLng);
       }, 500); 
+    }
+  });
+
+  // ════════ SMART ASSISTANT FAB (Requirement 6) ════════
+  // Floating Action Button: one-tap to auto-trigger the full intelligent flow
+  window.triggerSmartAssistant = () => {
+    const fabButton = document.getElementById('smartAssistantFab');
+    if (fabButton) {
+       fabButton.innerHTML = '<i class="lucide-loader" style="width:20px; height:20px; animation: spin 1s linear infinite;"></i><style>@keyframes spin { 100% { transform: rotate(360deg); } }</style>';
+       lucide.createIcons({root: fabButton});
+    }
+
+    const uPos = userMarkerObj ? userMarkerObj.getLatLng() : { lat: userLat, lng: userLng };
+
+    // Clear previous route
+    clearRouteDisplay();
+
+    // Re-render at current user position with current preference
+    reRenderMap(uPos.lat, uPos.lng, false).then(nearby => {
+      // Revert loading icon
+      if (fabButton) {
+         fabButton.innerHTML = '<i data-lucide="sparkles" style="width:20px; height:20px;"></i>';
+         lucide.createIcons({root: fabButton});
+      }
+
+      if (nearby && nearby.length > 0) {
+        const best = nearby.find(s => s.isBestMatch);
+        if (best) {
+          // Chain: Zoom → Route → Side Panel
+          setTimeout(() => {
+            map.flyTo([best.lat, best.lng], 16, { animate: true, duration: 1.0 });
+            window.startNavigation(best.lat, best.lng, uPos.lat, uPos.lng);
+            // Details are inherently shown now through Decision Card 
+          }, 600);
+        }
+      }
+
+      // Collapse search panel
+      if (findPanel) {
+        findPanel.classList.remove('expanded');
+        if (toggleFindBtn) toggleFindBtn.style.display = 'flex';
+      }
+    });
+  };
+
+  // ════════ ACTIVE SESSION CONTROL (Requirement 1 & 2) ════════
+  const activateNavigationSession = () => {
+    const qrData = sessionStorage.getItem('pendingQR');
+    const slotName = sessionStorage.getItem('pendingSlotName');
+    const validTill = sessionStorage.getItem('pendingValidTill');
+    const dLat = parseFloat(sessionStorage.getItem('pendingSlotLat'));
+    const dLng = parseFloat(sessionStorage.getItem('pendingSlotLng'));
+
+    if (!qrData || !slotName || !dLat || !dLng) return;
+
+    isActiveSession = true;
+    currentSessionData = { lat: dLat, lng: dLng, name: slotName };
+    arrivalTriggered = false;
+
+    // 1. UI Switch: Hide Search mode, show session mode
+    const searchPanel = document.getElementById('findParkingPanel');
+    const toggleBtn = document.getElementById('toggleFindPanel');
+    const fabButton = document.getElementById('smartAssistantFab');
+    const filterBar = document.getElementById('filterBar');
+    const sessionPanel = document.getElementById('activeSessionPanel');
+    
+    if (searchPanel) searchPanel.style.display = 'none';
+    if (toggleBtn) toggleBtn.style.display = 'none';
+    if (fabButton) fabButton.style.display = 'none';
+    if (filterBar) filterBar.style.display = 'none';
+    if (sessionPanel) {
+      sessionPanel.style.display = 'flex';
+      document.getElementById('sessionParkingName').innerText = slotName;
+      document.getElementById('sessionPrice').innerText = 'Paid'; // Static for MVP
+    }
+
+    // 2. Clear previous states
+    clearRouteDisplay();
+    const dc = document.getElementById('decisionCard');
+    if (dc) dc.classList.add('dc-hidden');
+
+    // 3. Populate QR Modal
+    document.getElementById('modalQrImage').src = `data:image/png;base64,${qrData}`;
+    document.getElementById('modalSlotName').innerText = slotName;
+    if (validTill) {
+      const d = new Date(validTill);
+      document.getElementById('modalValidTill').innerText = `Valid until ${d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+    }
+
+    // 4. Force Start Navigation
+    // Give map a moment to init if called on load
+    setTimeout(() => {
+      window.startNavigation(dLat, dLng, userLat, userLng);
+      map.flyTo([dLat, dLng], 15, { animate: true, duration: 1.0 });
+    }, 500);
+
+    // 5. Confirmation Toast
+    setTimeout(() => {
+      // Use existing showToast if defined or fallback to alert
+      if (typeof showToast === 'function') {
+        showToast("Parking Reserved", "Navigation mode active.", "success");
+      }
+    }, 1000);
+  };
+
+  const openQrModal = () => {
+    const overlay = document.getElementById('qrModalOverlay');
+    if (overlay) overlay.style.display = 'flex';
+  };
+
+  const closeQrModal = () => {
+    const overlay = document.getElementById('qrModalOverlay');
+    if (overlay) overlay.style.display = 'none';
+  };
+
+  const cancelSession = () => {
+    if (!confirm("Are you sure you want to cancel your parking session?")) return;
+    
+    // Clear session storage
+    sessionStorage.removeItem('pendingQR');
+    sessionStorage.removeItem('pendingSlotName');
+    sessionStorage.removeItem('pendingSlotLat');
+    sessionStorage.removeItem('pendingSlotLng');
+    sessionStorage.removeItem('pendingValidTill');
+
+    // Reset UI
+    window.location.href = 'map.html';
+  };
+
+  // Wire Session UI Buttons
+  const btnShowQR = document.getElementById('btnShowQR');
+  const btnArrivedQR = document.getElementById('btnArrivedQR');
+  const btnCloseQR = document.getElementById('btnCloseQR');
+  const btnCancelSession = document.getElementById('btnCancelSession');
+  const btnRecenter = document.getElementById('btnRecenterRoute');
+
+  if (btnShowQR) btnShowQR.onclick = openQrModal;
+  if (btnArrivedQR) btnArrivedQR.onclick = openQrModal;
+  if (btnCloseQR) btnCloseQR.onclick = closeQrModal;
+  if (btnCancelSession) btnCancelSession.onclick = cancelSession;
+  if (btnRecenter) {
+    btnRecenter.onclick = () => {
+      if (currentSessionData) {
+        map.flyTo([currentSessionData.lat, currentSessionData.lng], 16, { animate: true });
+      }
+    };
+  }
+
+  // ════════ BOOT DETECTION ════════
+  window.addEventListener('DOMContentLoaded', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (sessionStorage.getItem('pendingQR') || urlParams.get('session') === 'active') {
+      activateNavigationSession();
     }
   });
 
