@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ParkIQ — Profile</title>
+    <meta name="description" content="Manage your user profile and settings.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700;6..12,800;6..12,900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <link rel="stylesheet" href="dashboard.css">
+    <style>
+        .profile-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 2rem 0;
+        }
+        .profile-card {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            margin-bottom: 24px;
+        }
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .profile-avatar-large {
+            width: 80px;
+            height: 80px;
+            background: var(--card);
+            border: 2px solid var(--border);
+            color: var(--text);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.2rem;
+            font-weight: 900;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+        }
+        .profile-title {
+            margin: 0;
+            font-size: 1.6rem;
+            font-weight: 900;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .role-badge {
+            font-size: 0.72rem;
+            padding: 4px 12px;
+            border-radius: 99px;
+            background: #dcfce7;
+            color: #166534;
+            font-weight: 800;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+        .profile-email {
+            color: #6b7280;
+            margin-top: 4px;
+        }
+        .btn-danger {
+            background: #fef2f2;
+            color: #ef4444;
+            border: 1px solid #fecaca;
+            width: 100%;
+            padding: 14px;
+            border-radius: var(--radius-sm);
+            font-family: var(--font);
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 1rem;
+        }
+        .btn-danger:hover {
+            background: #fee2e2;
+            border-color: #fca5a5;
+            transform: translateY(-2px);
+        }
+        .form-input {
+            width: 100%; padding: 12px 14px;
+            background: var(--bg); border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm); font-family: var(--font);
+            font-size: 0.9rem; font-weight: 600; color: var(--text); outline: none;
+            transition: all 0.3s ease;
+        }
+        .form-input:focus { border-color: #1a1a1a; background: #fff; box-shadow: 0 0 0 3px rgba(0,0,0,0.05); }
+        .owner-cta-banner {
+            background: linear-gradient(135deg, #111827, #374151);
+            color: white;
+            padding: 24px;
+            border-radius: var(--radius);
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .owner-cta-banner h3 { font-size: 1.2rem; font-weight: 900; margin-bottom: 4px; }
+        .owner-cta-banner p { color: #9ca3af; font-size: 0.85rem; font-weight: 600; }
+        .btn-primary-inverse {
+            background: white; color: #111827; padding: 10px 20px;
+            border-radius: 8px; font-weight: 800; text-decoration: none;
+            transition: transform 0.2s;
+        }
+        .btn-primary-inverse:hover { transform: scale(1.05); }
+    </style>
+</head>
+
+<body>
+
+    <!-- ══════════ NAVBAR ══════════ -->
+    <nav class="navbar" id="navbar">
+        <a href="index.html" class="logo">
+            <div class="logo-mark"><i data-lucide="square-parking"></i></div>
+            <span>ParkIQ</span>
+        </a>
+        <div class="nav-links">
+            <a href="index.html" class="nav-link">Home</a>
+            <a href="map.html" class="nav-link">Explore</a>
+            <a href="dashboard.html" class="nav-link">Dashboard</a>
+            <a href="profile.html" class="nav-link active">Profile</a>
+        </div>
+        <div class="nav-right">
+            <div class="nav-user" id="navUser">
+                <div class="nav-avatar" id="navAvatar">—</div>
+                <span id="navName">Loading...</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ══════════ MAIN PROFILE ══════════ -->
+    <main class="dash-layout">
+        <div class="profile-container">
+            <h1 style="margin-bottom: 24px;">Your Profile</h1>
+            
+            <div class="profile-card">
+                <div class="profile-header">
+                    <div class="profile-avatar-large" id="profileAvatarLg">—</div>
+                    <div>
+                        <h2 class="profile-title" id="profileName">Loading User... <span class="role-badge" id="profileRoleBadge">Driver</span></h2>
+                        <div class="profile-email" id="profileEmail">user@example.com</div>
+                    </div>
+                </div>
+
+                <form id="profileForm">
+                    <div class="section-title"><i data-lucide="user-cog"></i> Edit Profile</div>
+                    
+                    <div class="form-group" style="margin-bottom: 16px;">
+                        <label for="editName" style="display:block; margin-bottom:8px; font-weight:800; font-size:0.8rem; text-transform:uppercase; color:var(--text-sec);">Full Name</label>
+                        <input type="text" id="editName" class="form-input" placeholder="Enter your name" required>
+                    </div>
+                    
+                    <div class="form-group" style="margin-bottom: 24px;">
+                        <label for="editVehicle" style="display:block; margin-bottom:8px; font-weight:800; font-size:0.8rem; text-transform:uppercase; color:var(--text-sec);">Vehicle Type</label>
+                        <select id="editVehicle" class="form-input">
+                            <option value="car">Car</option>
+                            <option value="bike">Bike</option>
+                            <option value="suv">SUV</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn-submit" id="saveProfileBtn">Save Changes</button>
+                </form>
+            </div>
+            
+            <div id="ownerArea">
+                <!-- Injected via JS -->
+            </div>
+
+            <div class="profile-card" style="padding: 1.5rem;">
+                <div class="section-title" style="margin-bottom: 16px;"><i data-lucide="shield-check"></i> Security & Session</div>
+                <div style="background:#f9fafb; padding:16px; border-radius:8px; border:1px solid #e5e7eb; margin-bottom:20px; font-size:0.85rem; font-weight:600; color:var(--text-sec);">
+                    <div style="margin-bottom: 8px;"><strong>Last Login:</strong> <span id="lastLoginTime">Just now</span></div>
+                    <div><strong>Active Session:</strong> Current Device</div>
+                </div>
+                <button class="btn-danger" id="logoutBtn"><i data-lucide="log-out"></i> Secure Log Out</button>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        lucide.createIcons();
+        const token = localStorage.getItem('token');
+        const userStr = localStorage.getItem('user');
+
+        if (!token) {
+            window.location.href = 'login.html';
+        }
+
+        let currentUser = null;
+        try {
+            currentUser = JSON.parse(userStr);
+        } catch (_) {
+            currentUser = { name: 'User', email: '' };
+        }
+
+        // Set Nav and Header
+        const initial = (currentUser?.name || 'U').charAt(0).toUpperCase();
+        document.getElementById('navName').textContent = currentUser?.name || 'User';
+        document.getElementById('navAvatar').textContent = initial;
+        document.getElementById('profileName').childNodes[0].textContent = (currentUser?.name || 'User') + ' ';
+        document.getElementById('profileEmail').textContent = currentUser?.email || '';
+        document.getElementById('profileAvatarLg').textContent = initial;
+
+        // Owner verification Logic
+        const isOwner = currentUser?.isOwner || false; // Mocking or real response flag
+        
+        const ownerArea = document.getElementById('ownerArea');
+        if (isOwner) {
+            document.getElementById('profileRoleBadge').textContent = 'Owner';
+            ownerArea.innerHTML = `
+                <div class="profile-card">
+                    <div class="section-title"><i data-lucide="building"></i> My Parking Locations</div>
+                    <p style="color:var(--text-sec); font-size:0.85rem; font-weight:600; margin-bottom:16px;">You are currently managing parking spaces. View your properties below.</p>
+                    <a href="dashboard.html" class="btn-sec" style="justify-content:center; padding:12px; display:flex;">Manage in Dashboard</a>
+                </div>
+            `;
+        } else {
+            ownerArea.innerHTML = `
+                <div class="owner-cta-banner">
+                    <div>
+                        <h3>Got a parking spot?</h3>
+                        <p>Turn your empty driveway into daily revenue.</p>
+                    </div>
+                    <a href="#" class="btn-primary-inverse" onclick="alert('Provider onboarding flows coming soon!')">List Space</a>
+                </div>
+            `;
+        }
+
+        // Set Last Login
+        const lastLogin = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute:'2-digit' }) + ' today';
+        document.getElementById('lastLoginTime').textContent = lastLogin;
+
+        // Set form fields
+        if(document.getElementById('editName')) document.getElementById('editName').value = currentUser?.name || '';
+        if(document.getElementById('editVehicle')) document.getElementById('editVehicle').value = currentUser?.vehicle_type || 'car';
+
+        // Logout logic
+        const logoutBtn = document.getElementById('logoutBtn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', () => {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.location.href = 'login.html';
+            });
+        }
+
+        // Form Submission
+        const profileForm = document.getElementById('profileForm');
+        profileForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('saveProfileBtn');
+            btn.textContent = 'Saving...';
+            btn.style.opacity = '0.7';
+
+            setTimeout(() => {
+                if (currentUser) {
+                    currentUser.name = document.getElementById('editName').value;
+                    currentUser.vehicle_type = document.getElementById('editVehicle').value;
+                    localStorage.setItem('user', JSON.stringify(currentUser));
+                    
+                    // Update UI immediately
+                    document.getElementById('profileName').childNodes[0].textContent = currentUser.name + ' ';
+                    document.getElementById('navName').textContent = currentUser.name;
+                    const newInitial = (currentUser.name || 'U').charAt(0).toUpperCase();
+                    document.getElementById('navAvatar').textContent = newInitial;
+                    document.getElementById('profileAvatarLg').textContent = newInitial;
+                    
+                    btn.textContent = 'Save Changes';
+                    btn.style.opacity = '1';
+                    
+                    // Show a quick success highlight
+                    btn.style.background = 'var(--accent-green)';
+                    setTimeout(() => { btn.style.background = '#1a1a1a'; }, 1500);
+                }
+            }, 600); // Simulate network lag
+        });
+    </script>
+</body>
+
+</html>

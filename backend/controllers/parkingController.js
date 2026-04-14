@@ -61,10 +61,10 @@ async function getAllSlots(req, res) {
   }
 }
 
-// GET /api/parking/nearby?lat=X&lng=Y&radius=3
+// GET /api/parking/nearby?lat=X&lng=Y&radius=3&preference=fastest
 async function getNearbySlots(req, res) {
   try {
-    const { lat, lng, radius = 3, limit = 10 } = req.query;
+    const { lat, lng, radius = 3, limit = 10, preference = 'smart' } = req.query;
 
     if (!lat || !lng) {
       return res.status(400).json({ error: 'lat and lng query params are required.' });
@@ -94,7 +94,7 @@ async function getNearbySlots(req, res) {
     }));
 
     // Pass through the Intelligence Service scoring engine
-    const rankedCandidates = await rankParkingSlots(standardFormat, userLat, userLng);
+    const rankedCandidates = await rankParkingSlots(standardFormat, userLat, userLng, { preference });
     const topMatches = rankedCandidates.slice(0, maxLimit);
 
     return res.json(topMatches);

@@ -367,9 +367,17 @@
     });
 
     // ════════ POPUP CARD — IMPROVEMENT 4 ════════
+    let labelBadge = '';
+    if (slot.label) {
+      labelBadge = `<span style="font-size: 0.7rem; font-weight: 800; background: #f3e8ff; color: #9333ea; padding: 3px 8px; border-radius: 6px; vertical-align: middle; margin-left: 6px; display: inline-block;">⭐ ${slot.label}</span>`;
+    }
+
     const popupHtml = `
       <div class="popup-card">
-        <div class="popup-name">${name}</div>
+        <div class="popup-name" style="display: flex; justify-content: space-between; align-items: center;">
+          <span>${name}</span>
+          ${labelBadge}
+        </div>
         
         <div class="popup-info-row">
           <span class="popup-info-label"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg> Price</span>
@@ -444,93 +452,80 @@
   };
 
   // ════════ RE-RENDER MAP ════════
-  const reRenderMap = (lat, lon, isLive = false) => {
+  const reRenderMap = async (lat, lon, isLive = false) => {
     markerCluster.clearLayers();
     allMarkers.forEach(m => map.removeLayer(m));
     allMarkers = [];
     if (userMarkerObj) map.removeLayer(userMarkerObj);
 
-    let maxRadius = 15.0;
-    
-    let nearby = allParkingData.map(slot => {
-        slot.distance = window.geofenceUtils.calculateDistance(lat, lon, slot.lat, slot.lng);
-        return slot;
-    }).filter(slot => slot.distance <= maxRadius);
+    const prefSelect = document.getElementById('smartPreference');
+    const preference = prefSelect ? prefSelect.value : 'smart';
 
-    nearby = window.mapFilters.applyActiveFilters(nearby, currentFilters);
-    nearby = nearby.sort((a,b) => a.distance - b.distance).slice(0, 50);
+    try {
+      const response = await fetch(`/api/parking/nearby?lat=${lat}&lng=${lon}&preference=${preference}&limit=50`);
+      let nearby = await response.json();
 
-    // ════════ RECOMMENDATION ENGINE — IMPROVEMENT 3 ════════
-    let recommendedSlotId = null;
-    if (nearby.length > 0) {
-      let bestScore = Infinity;
-      nearby.forEach(slot => {
-        const avail = slot.availableSlots || slot.available_slots || 0;
-        if (avail > 0) {
-          // Score: distance (40%), price (35%), availability (25%)
-          const distPenalty = slot.distance * 12;
-          const pricePenalty = (slot.price || 30) * 0.25;
-          const availBonus = (avail / (slot.totalSlots || slot.total_slots || 1)) * 3;
-          const score = distPenalty + pricePenalty - availBonus;
-          if (score < bestScore) {
-            bestScore = score;
-            recommendedSlotId = slot.id;
+      if (!Array.isArray(nearby)) {
+          nearby = [];
+      }
+
+      nearby = window.mapFilters.applyActiveFilters(nearby, currentFilters);
+
+      // Render markers
+      nearby.forEach((slot) => {
+        renderParkingMarker({
+          id: slot.id,
+          lat: slot.lat,
+          lng: slot.lng,
+          name: slot.name,
+          status: slot.status,
+          availableSlots: slot.availableSlots || slot.available_slots,
+          totalSlots: slot.totalSlots || slot.total_slots,
+          price: slot.price || 30,
+          distance: slot.distance,
+          etaText: slot.etaText,
+          isRecommended: slot.isBestMatch,
+          isBestMatch: slot.isBestMatch,
+          label: slot.label
+        });
+      });
+
+      // ════════ HEATMAP — IMPROVEMENT 6 ════════
+      if (heatLayerObj) map.removeLayer(heatLayerObj);
+      if (isHeatmapActive) {
+        const heatData = nearby.map(s => {
+          const total = s.totalSlots || s.total_slots || 1;
+          const avail = s.availableSlots || s.available_slots || 0;
+          const bookings = s.bookings || (total - avail);
+          const rawDemand = (bookings * 0.6) + ((total - avail) * 0.4);
+          const normalizedScore = Math.max(0, Math.min(1, rawDemand / total));
+          return [s.lat, s.lng, normalizedScore];
+        });
+        heatLayerObj = L.heatLayer(heatData, { 
+          radius: 30, 
+          blur: 25, 
+          maxZoom: 16,
+          gradient: {
+            0.0: '#3b82f6',
+            0.25: '#06b6d4',
+            0.5: '#eab308',
+            0.75: '#f97316',
+            1.0: '#ef4444'
           }
-        }
-      });
-    }
+        }).addTo(map);
+        
+        if (heatLayerObj._canvas) { heatLayerObj._canvas.style.opacity = '0.6'; }
+      }
 
-    // Render markers
-    nearby.forEach((slot) => {
-      renderParkingMarker({
-        id: slot.id,
-        lat: slot.lat,
-        lng: slot.lng,
-        name: slot.name,
-        status: slot.status,
-        availableSlots: slot.availableSlots || slot.available_slots,
-        totalSlots: slot.totalSlots || slot.total_slots,
-        price: slot.price || 30,
-        distance: slot.distance,
-        isRecommended: slot.id === recommendedSlotId
-      });
-    });
-
-    // ════════ HEATMAP — IMPROVEMENT 6 ════════
-    if (heatLayerObj) map.removeLayer(heatLayerObj);
-    if (isHeatmapActive) {
-      const heatData = nearby.map(s => {
-        const total = s.totalSlots || s.total_slots || 1;
-        const avail = s.availableSlots || s.available_slots || 0;
-        const bookings = s.bookings || (total - avail);
-        // demand_score = (bookings * 0.6) + ((total - available) * 0.4)
-        const rawDemand = (bookings * 0.6) + ((total - avail) * 0.4);
-        const normalizedScore = Math.max(0, Math.min(1, rawDemand / total));
-        return [s.lat, s.lng, normalizedScore];
-      });
-      heatLayerObj = L.heatLayer(heatData, { 
-        radius: 30, 
-        blur: 25, 
-        maxZoom: 16,
-        gradient: {
-          0.0: '#3b82f6',   // blue
-          0.25: '#06b6d4',  // cyan
-          0.5: '#eab308',   // yellow
-          0.75: '#f97316',  // orange
-          1.0: '#ef4444'    // red
-        }
-      }).addTo(map);
+      // User marker
+      userMarkerObj = L.marker([lat, lon], { icon: userIcon, zIndexOffset: 1000 }).addTo(map);
       
-      // Set reduced opacity so markers stay visible
-      if (heatLayerObj._canvas) { heatLayerObj._canvas.style.opacity = '0.6'; }
+      // IMPROVEMENT 9 — Smooth fly animation
+      map.flyTo([lat, lon], 14, { animate: true, duration: 1.2 });
+      setTimeout(() => lucide.createIcons(), 50);
+    } catch(err) {
+        console.error("Failed to fetch smart nearby parking", err);
     }
-
-    // User marker
-    userMarkerObj = L.marker([lat, lon], { icon: userIcon, zIndexOffset: 1000 }).addTo(map);
-    
-    // IMPROVEMENT 9 — Smooth fly animation
-    map.flyTo([lat, lon], 14, { animate: true, duration: 1.2 });
-    lucide.createIcons();
   };
 
   // ════════ FETCH DATA ════════
@@ -793,6 +788,16 @@
       filterPanel.style.display = 'none';
       if (toggleFilterBtn) toggleFilterBtn.classList.remove('active');
     });
+  }
+
+  // ════════ INTELLIGENCE PREFERENCE OBSERVER ════════
+  const prefSelect = document.getElementById('smartPreference');
+  if (prefSelect) {
+      prefSelect.addEventListener('change', () => {
+          const uLat = userMarkerObj ? userMarkerObj.getLatLng().lat : userLat;
+          const uLng = userMarkerObj ? userMarkerObj.getLatLng().lng : userLng;
+          reRenderMap(uLat, uLng, false);
+      });
   }
 
   // ════════ HEATMAP TOGGLE — IMPROVEMENT 7 ════════
