@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<title>ParkIQ Assistant</title>
+
+<style>
+
+body{
+margin:0;
+font-family:Arial;
+background:linear-gradient(135deg,#1e3c72,#2a5298);
+height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+}
+
+.chatbox{
+
+width:380px;
+height:520px;
+background:white;
+border-radius:15px;
+box-shadow:0 10px 25px rgba(0,0,0,0.3);
+display:flex;
+flex-direction:column;
+overflow:hidden;
+
+}
+
+.header{
+
+background:#1e3c72;
+color:white;
+padding:15px;
+font-size:18px;
+text-align:center;
+font-weight:bold;
+
+}
+
+.messages{
+
+flex:1;
+padding:15px;
+overflow-y:auto;
+background:#f5f7fb;
+
+}
+
+.message{
+
+margin:8px 0;
+padding:10px 14px;
+border-radius:12px;
+max-width:70%;
+word-wrap:break-word;
+
+}
+
+.user{
+
+background:#2a5298;
+color:white;
+margin-left:auto;
+
+}
+
+.bot{
+
+background:#e6e9f2;
+color:#333;
+
+}
+
+.input-area{
+
+display:flex;
+border-top:1px solid #ddd;
+
+}
+
+input{
+
+flex:1;
+padding:12px;
+border:none;
+font-size:14px;
+outline:none;
+
+}
+
+button{
+
+background:#1e3c72;
+color:white;
+border:none;
+padding:12px 18px;
+cursor:pointer;
+
+}
+
+button:hover{
+
+background:#2a5298;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="chatbox">
+
+<div class="header">
+🚗 ParkIQ AI Assistant
+</div>
+
+<div class="messages" id="messages"></div>
+
+<div class="input-area">
+
+<input id="msg" placeholder="Ask about parking availability...">
+
+<button onclick="sendMessage()">Send</button>
+
+</div>
+
+</div>
+
+<script>
+
+async function sendMessage(){
+
+let input = document.getElementById("msg")
+let text = input.value.trim()
+
+if(text === "") return
+
+let messages = document.getElementById("messages")
+
+messages.innerHTML += `<div class="message user">${text}</div>`
+
+input.value=""
+
+try{
+
+let response = await fetch("http://127.0.0.1:5002/chat",{
+
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({
+message:text
+})
+
+})
+
+let data = await response.json()
+
+messages.innerHTML += `<div class="message bot">${data.reply}</div>`
+
+messages.scrollTop = messages.scrollHeight
+
+}catch(error){
+
+messages.innerHTML += `<div class="message bot">⚠️ Chatbot server not responding</div>`
+
+}
+
+}
+
+document.getElementById("msg").addEventListener("keypress",function(e){
+
+if(e.key==="Enter"){
+sendMessage()
+}
+
+})
+
+</script>
+
+</body>
+
+</html>
